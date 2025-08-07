@@ -20,22 +20,20 @@ export async function authFetch(
   if (res.status !== 401) return res;
   console.log("Unauthorized response, attempting to refresh token...");
 
+  if (window.location.pathname === "/login") {
+    return res;
+  }
   // try refresh…
-  //
   try {
     console.log("hitting refresh endpoint...");
-    const refreshRes = await fetchFn("/refresh", {
+    const refreshRes = await fetch("http://localhost:8000/auth/refresh", {
       method: "POST",
       credentials: "include",
     });
   } catch (error) {
     console.error("Error during token refresh:", error);
-    window.location.href = "/login";
-    throw new Error("Not authenticated");
-  }
-
-  if (window.location.pathname === "/login") {
-    return res;
+    // window.location.href = "/login";
+    // throw new Error("Not authenticated");
   }
 
   console.log("refresh successful, retrying original request...");

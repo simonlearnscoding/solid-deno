@@ -20,6 +20,7 @@ auth.post("/logout", (c) => {
 auth.post("/refresh", async (c) => {
   console.log("Refreshing token...");
   const refreshToken = getCookie(c, "refreshToken");
+  console.log("refreshToken:", refreshToken);
   if (!refreshToken) return c.json({ error: "No refresh token" }, 401);
 
   try {
@@ -45,8 +46,8 @@ auth.post("/login", async (c) => {
   const user = await validateUser(email, password);
   if (!user) return c.json({ error: "Invalid credentials" }, 401);
 
-  const token = await generateToken({ email: user.email }, 15); // 15 minutes
-  const refreshToken = await generateToken({ email }, 60); // 30 days
+  const token = await generateToken({ email: user.email }, 60 * 30); // 15 minutes
+  const refreshToken = await generateToken({ email }, 24 * 60 * 60 * 30); // 30 days
 
   setCookie(c, "token", token, {
     httpOnly: true,
@@ -59,7 +60,7 @@ auth.post("/login", async (c) => {
     httpOnly: true,
     secure: true,
     sameSite: "Strict",
-    path: "/refresh", // 🔒 only sent to refresh endpoint
+    path: "/auth/refresh", // 🔒 only sent to refresh endpoint
   });
   // Set secure HTTP-only cookie
   return c.json({ message: "Login successful", user }, 200, {});
@@ -144,7 +145,7 @@ auth.post("/register", async (c: any) => {
     httpOnly: true,
     secure: true,
     sameSite: "Strict",
-    path: "/refresh", // 🔒 only sent to refresh endpoint
+    path: "/auth/refresh", // 🔒 only sent to refresh endpoint
   });
   return c.json({ user });
 });
