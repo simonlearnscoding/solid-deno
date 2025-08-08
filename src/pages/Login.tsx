@@ -1,5 +1,6 @@
 import { createSignal } from "solid-js";
 import { useNavigate } from "@solidjs/router";
+import { Show } from "solid-js";
 import { useAuthStore } from "../stores/authStore.ts";
 import { createEffect } from "solid-js";
 
@@ -91,7 +92,7 @@ export default function Login() {
                     "Login"
                   )}
                 </button>
-                <div class=""> or </div>
+                <div class="divider"> or </div>
                 <div
                   class="cursor-pointer text-blue-500"
                   onClick={() => {

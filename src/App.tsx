@@ -12,6 +12,8 @@ const App = () => {
   const auth = useAuthStore();
   onMount(() => {
     auth.actions.verifyToken();
+
+    document.documentElement.setAttribute("data-theme", "winter");
   });
   //TODO: protect routes when user not logged in
   const queryClient = new QueryClient();

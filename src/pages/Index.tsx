@@ -11,6 +11,11 @@ export default function Index() {
   }, 1000);
   return (
     <main>
+      <input
+        type="checkbox"
+        value="synthwave"
+        class="toggle theme-controller"
+      />
       <h1>Welcome to the Dinosaur app</h1>
       <p>Click on a dinosaur below to learn more.</p>
       <A href={"/login"}>Login</A>

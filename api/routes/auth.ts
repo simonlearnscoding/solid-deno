@@ -17,7 +17,11 @@ const auth = new Hono();
 
 auth.post("/logout", (c: Context) => {
   deleteCookie(c, "token");
-  deleteCookie(c, "refreshToken");
+
+  // Delete refresh token with the same path it was set with
+  deleteCookie(c, "refreshToken", {
+    path: "/auth/refresh", // Must match the path used when setting the cookie
+  });
   return c.json({ message: "Logout successful" }, 200, {});
 });
 
