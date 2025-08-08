@@ -158,8 +158,8 @@ auth.post("/register", async (c: Context) => {
   const user = await registerUser(email, password, name, { avatarUrl });
   if (!user) return c.json({ error: "User already exists" }, 409);
 
-  const token = await generateToken({ email: user.email }, 15); // 15 minutes
-  const refreshToken = await generateToken({ email }, 30); // 30 days
+  const token = await generateToken({ email: user.email }, 60 * 30); // 15 minutes
+  const refreshToken = await generateToken({ email }, 24 * 60 * 60 * 30); // 30 days
 
   setCookie(c, "token", token, {
     httpOnly: true,
