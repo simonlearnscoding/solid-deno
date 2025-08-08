@@ -1,7 +1,14 @@
 import { createStore } from "solid-js/store";
 
+type User = {
+  id?: string;
+  email: string;
+  name?: string;
+  avatarUrl?: string;
+};
+
 type AuthState = {
-  user: { email: string } | null;
+  user: User | null;
   loading: boolean;
   error: string | null;
 };
@@ -12,6 +19,12 @@ const [authState, setAuthState] = createStore<AuthState>({
   error: null,
 });
 
+type RegisterInput = {
+  email: string;
+  password: string;
+  name: string;
+  avatar?: File; // optional
+};
 const actions = {
   async verifyToken() {
     try {
@@ -22,7 +35,7 @@ const actions = {
         throw new Error();
       }
 
-      //TODO: this should return more than just the email token lets just 
+      //TODO: this should return more than just the email token lets just
       //fetch the user one time won't hurt
       const resp = await res.json();
       setAuthState({ user: resp.user, loading: false });
@@ -30,23 +43,26 @@ const actions = {
       console.log("error getting token");
     }
   },
-  async register(email: string, password: string, name: string) {
+
+  async register(input: RegisterInput) {
     setAuthState({ loading: true, error: null });
     try {
+      const fd = new FormData();
+      fd.append("email", input.email);
+      fd.append("password", input.password);
+      fd.append("name", input.name);
+      if (input.avatar) fd.append("avatar", input.avatar);
+
       const res = await fetch("http://localhost:8000/auth/register", {
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name }),
+        body: fd, // ⚠️ do NOT set Content-Type manually
       });
 
-      if (!res.ok) {
-        const text = await res.json();
-        throw new Error((await text?.error) || "Registration failed");
-      }
-      // Auto-login after registration
-      const resp = await res.json();
-      setAuthState({ user: resp.user, loading: false });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Registration failed");
+
+      setAuthState({ user: data.user, loading: false });
     } catch (err: any) {
       setAuthState({
         error: err.message || "Registration failed",
@@ -61,6 +77,9 @@ const actions = {
       const res = await fetch("http://localhost:8000/auth/login", {
         method: "POST",
         credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ email, password }),
       });
       //TODO: kinda nasty but it'll do for now
