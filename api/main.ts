@@ -4,6 +4,7 @@ import authRoutes from "./routes/auth.ts";
 import usersRoutes from "./routes/users.ts";
 import apiRoutes from "./routes/api.ts";
 import authMiddleware from "./middlewares/authMiddleware.ts";
+import { serveStatic } from "jsr:@hono/hono/serve-static";
 
 import { cors } from "jsr:@hono/hono/cors";
 
@@ -13,6 +14,8 @@ await connectDB().catch((err: Error) => {
   console.error("Failed to connect to MongoDB:", err);
   Deno.exit(1);
 });
+
+app.use("/uploads/*", serveStatic({ root: "./uploads" }));
 // CORS Configuration
 app.use(
   "*",
