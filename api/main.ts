@@ -1,6 +1,7 @@
 import { Hono } from "@hono/hono";
 import { connectDB } from "./../lib/db.ts";
 import authRoutes from "./routes/auth.ts";
+import usersRoutes from "./routes/users.ts";
 import apiRoutes from "./routes/api.ts";
 import authMiddleware from "./middlewares/authMiddleware.ts";
 
@@ -27,6 +28,7 @@ app.use(
 // app.use("/api", authMiddleware);
 app.route("/auth", authRoutes);
 app.route("/api", apiRoutes);
+app.route("/users", usersRoutes);
 
 app.get("/auth/test", (c) => {
   return c.json({ message: "Middleware passed hahahaha!" });
