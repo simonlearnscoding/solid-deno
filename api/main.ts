@@ -7,7 +7,6 @@ import authMiddleware from "./middlewares/authMiddleware.ts";
 import { serveStatic } from "jsr:@hono/hono/serve-static";
 
 import { cors } from "jsr:@hono/hono/cors";
-
 const app = new Hono();
 // 1. Initialize Database
 await connectDB().catch((err: Error) => {
@@ -15,7 +14,9 @@ await connectDB().catch((err: Error) => {
   Deno.exit(1);
 });
 
+//  Serve Static Files
 app.use("/uploads/*", serveStatic({ root: "./uploads" }));
+
 // CORS Configuration
 app.use(
   "*",
