@@ -39,7 +39,7 @@ export default function Profile() {
 
   return (
     <main class="flex flex-col h-dvh max-h-dvh items-center">
-      <h1 class="mb-4 mt-6">Hi search for courses here</h1>
+      <h1 class="mb-4 mt-6 ">Find your dream course today</h1>
 
       <input
         type="text"
