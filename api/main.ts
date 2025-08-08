@@ -1,3 +1,7 @@
+import { load } from "jsr:@std/dotenv";
+
+// Load variables from .env into Deno.env
+await load({ export: true });
 import { Hono } from "@hono/hono";
 import { connectDB } from "./../lib/db.ts";
 import authRoutes from "./routes/auth.ts";

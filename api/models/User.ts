@@ -6,6 +6,7 @@ const UserSchema: Schema = new Schema({
   email: { type: String, required: true },
   name: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
+  avatarUrl: { type: String },
 });
 
 export default mongoose.models.User || mongoose.model<User>("User", UserSchema);

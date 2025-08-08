@@ -4,4 +4,5 @@ export interface User extends Document {
   password: string;
   name: string;
   createdAt: Date;
+  avatarUrl?: string;
 }

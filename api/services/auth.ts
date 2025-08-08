@@ -1,20 +1,57 @@
 import { sign, verify } from "@hono/jwt";
 import User from "./../models/User.ts";
+import bcrypt from "bcryptjs";
 
 const secret = "your-secret-key";
 
+// ------- LOGIN VALIDATION -------
 export async function validateUser(email: string, password: string) {
-  const user = await User.findOne({ email }).exec();
-  if (!user) return null;
+  const doc = await User.findOne({ email }).exec();
+  if (!doc) return null;
 
-  if (user.password !== password) return null; // Replace with bcrypt later
+  const ok = await bcrypt.compare(password, doc.password);
+  if (!ok) return null;
 
-  return { email: user.email, id: user._id };
+  // return only safe/public fields
+  return {
+    id: doc._id.toString(),
+    email: doc.email,
+    name: doc.name,
+    avatarUrl: doc.avatarUrl as string | undefined,
+  };
+}
+
+export async function registerUser(
+  email: string,
+  password: string,
+  name: string,
+  opts: RegisterOpts = {},
+) {
+  // guard against dupes
+  const existing = await User.findOne({ email }).lean().exec();
+  if (existing) return null;
+
+  // hash
+  const hashed = await bcrypt.hash(password, 12);
+
+  const doc = await User.create({
+    email,
+    password: hashed,
+    name,
+    avatarUrl: opts.avatarUrl, // schema should allow this field
+  });
+
+  return {
+    id: doc._id.toString(),
+    email: doc.email,
+    name: doc.name,
+    avatarUrl: doc.avatarUrl as string | undefined,
+  };
 }
 
 export async function generateToken(
   payload: Record<string, unknown>,
-  expiresInSeconds,
+  expiresInSeconds: number,
 ) {
   const exp = Math.floor(Date.now() / 1000) + expiresInSeconds;
   return await sign({ ...payload, exp }, secret);
@@ -24,20 +61,6 @@ export async function verifyToken(token: string) {
   return await verify(token, secret); // HS256 is default, so optional
 }
 
-export async function registerUser(
-  email: string,
-  password: string,
-  name: string,
-) {
-  const existing = await User.findOne({ email }).exec();
-  if (existing) return null;
-
-  const user = await User.create({
-    email,
-    //TODO: hash later
-    password,
-    name,
-  });
-
-  return { email: user.email, id: user._id };
-}
+type RegisterOpts = {
+  avatarUrl?: string;
+};

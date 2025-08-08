@@ -1,7 +1,7 @@
 import { Hono } from "@hono/hono";
 import { HTTPException } from "hono/http-exception"; // Add this import
 import { Context } from "jsr:@hono/hono";
-
+import { saveImageToUploads } from "../lib/uploadImage.ts";
 const isProd = Deno.env.get("NODE_ENV") === "production";
 console.log("env:", Deno.env.get("NODE_ENV"), isProd);
 
@@ -133,9 +133,29 @@ auth.get("/me", async (c: Context) => {
 
 //TODO: fix any with actual cookies type
 auth.post("/register", async (c: Context) => {
-  const { email, password, name } = await c.req.json();
+  const form = await c.req.formData();
 
-  const user = await registerUser(email, password, name);
+  // text fields
+  const email = String(form.get("email") ?? "");
+  const password = String(form.get("password") ?? "");
+  const name = String(form.get("name") ?? "");
+
+  if (!email || !password || !name) {
+    return c.json({ error: "Missing required fields" }, 400);
+  }
+
+  let avatarUrl: string | undefined;
+  const avatar = form.get("avatar");
+  if (avatar instanceof File && avatar.size > 0) {
+    try {
+      const saved = await saveImageToUploads(avatar, "avatars");
+      avatarUrl = saved.publicUrl;
+      // (optional) keep saved.diskPath in case you want to delete later
+    } catch (e: any) {
+      return c.json({ error: e.message ?? "Avatar upload failed" }, 400);
+    }
+  }
+  const user = await registerUser(email, password, name, { avatarUrl });
   if (!user) return c.json({ error: "User already exists" }, 409);
 
   const token = await generateToken({ email: user.email }, 15); // 15 minutes
