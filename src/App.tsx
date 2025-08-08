@@ -1,6 +1,9 @@
 import { Route, Router } from "@solidjs/router";
 import Index from "./pages/Index.tsx";
 import Dinosaur from "./pages/Dinosaur.tsx";
+import AppLayout from "./layouts/AppLayout.tsx";
+import Profile from "./pages/Profile.tsx";
+import Search from "./pages/Search.tsx";
 import Login from "./pages/Login.tsx";
 import Register from "./pages/Register.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
@@ -10,6 +13,7 @@ import "./App.css";
 
 const App = () => {
   const auth = useAuthStore();
+  console.log("be");
   onMount(() => {
     auth.actions.verifyToken();
 
@@ -20,8 +24,11 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
-        <Route path="/" component={Index} />
-        <Route path="/:selectedDinosaur" component={Dinosaur} />
+        <Route path="/" component={AppLayout}>
+          <Route path="" component={Index} />
+          <Route path="profile" component={Profile} />
+          <Route path="search" component={Search} />
+        </Route>
         <Route path="/login" component={Login} />
         <Route path="/signup" component={Register} />
       </Router>

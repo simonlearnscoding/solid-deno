@@ -3,7 +3,8 @@
   themes: all; /* or pick specific themes */
 }
 
-@theme {
+/* Global element defaults go in base layer */
+@layer base {
   h1 {
     @apply text-3xl font-bold;
   }
