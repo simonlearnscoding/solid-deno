@@ -83,7 +83,6 @@ users.get("/me/trainings/next", async (c) => {
       throw new HTTPException(401, { message: "Invalid token payload" });
 
     const next = await fetchNextTrainingForUser(payload.email as string);
-    console.log("next training:", next);
     if (!next) return c.body(null, 204); // no content
 
     return c.json(next, 200);
@@ -95,6 +94,7 @@ users.get("/me/trainings/next", async (c) => {
     return c.json({ error: "Internal server error" }, 500);
   }
 });
+
 users.get("/me/trainings", async (c: Context) => {
   try {
     console.log("Getting user trainings...");
@@ -108,7 +108,11 @@ users.get("/me/trainings", async (c: Context) => {
       throw new HTTPException(401, { message: "Invalid token payload" });
     }
 
-    const res = await fetchTrainingsForUser(payload.email as string);
+    const q = c.req.query("q")?.trim();
+    console.log("Query parameter:", q);
+
+    const res = await fetchTrainingsForUser(payload.email as string, q);
+
     // trainings return
 
     return c.json(res, 200);

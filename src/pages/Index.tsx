@@ -1,4 +1,4 @@
-import { For, Suspense } from "solid-js";
+import { createSignal, For, Suspense } from "solid-js";
 import RightSidebar from "../components/RightSidebar.tsx";
 import useQueryUpcomingTrainings from "../hooks/queries/useQueryUpcomingTraining.ts";
 import LeftSidebar from "../components/LeftSidebar.tsx";
@@ -9,7 +9,11 @@ import { useAuthStore } from "../stores/authStore.ts";
 export default function Index() {
   const auth = useAuthStore();
   const user = auth.state.user;
-  const query = useQueryUpcomingTrainings();
+
+  const [search, setSearch] = createSignal(""); // 🔹 search term
+
+  const query = useQueryUpcomingTrainings(search);
+
   return (
     <div class="flex flex-col gap-3 px-4 pt-8 h-screen overflow-hidden">
       <div class="flex">
@@ -28,13 +32,12 @@ export default function Index() {
       </div>
 
       <div class="flex flex-1 min-h-0">
-        <LeftSidebar />
+        <LeftSidebar search={search} onSearch={setSearch} />
         <div class="flex flex-col flex-grow min-h-0">
-          {/* Scrollable content container */}
           <div class="flex-1 min-h-0 overflow-y-auto">
             <div class="flex flex-col gap-3 py-4">
               <Suspense
-                fallback={Array.from({ length: 8 }, (_, i) => (
+                fallback={Array.from({ length: 8 }, () => (
                   <div class="skeleton w-full h-48 bg-gray-200 rounded-lg"></div>
                 ))}
               >

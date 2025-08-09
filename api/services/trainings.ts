@@ -332,18 +332,27 @@ export async function fetchNextTrainingForUser(userEmail: string) {
 
   return next ?? null;
 }
-export async function fetchTrainingsForUser(userEmail: string) {
+export async function fetchTrainingsForUser(userEmail: string, q?: string) {
   try {
     const now = new Date();
 
     const userDoc = await User.findOne({ email: userEmail }).select("_id");
     if (!userDoc) throw new Error(`User with email ${userEmail} not found`);
 
-    const trainings = await Training.aggregate([
-      // 1) Only upcoming
-      { $match: { startsAt: { $gte: now } } },
+    const matchStage: any = {
+      startsAt: { $gte: now },
+    };
 
-      // 3) All attendance rows for counts
+    if (q && q.trim()) {
+      const regex = new RegExp(q.trim(), "i");
+      matchStage.$or = [{ title: regex }, { location: regex }];
+    }
+
+    const trainings = await Training.aggregate([
+      // 1) Filter by upcoming + search query
+      { $match: matchStage },
+
+      // 2) Attendance counts
       {
         $lookup: {
           from: "trainingattendances",
@@ -353,7 +362,7 @@ export async function fetchTrainingsForUser(userEmail: string) {
         },
       },
 
-      // 4) Trainer info
+      // 3) Trainer info
       {
         $lookup: {
           from: "users",
@@ -364,7 +373,7 @@ export async function fetchTrainingsForUser(userEmail: string) {
       },
       { $unwind: "$trainerDoc" },
 
-      // 5) Course info (category/image)
+      // 4) Course info
       {
         $lookup: {
           from: "courses",
@@ -375,7 +384,7 @@ export async function fetchTrainingsForUser(userEmail: string) {
       },
       { $unwind: "$courseDoc" },
 
-      // 6) Compute counts and format
+      // 5) Counts + formatting
       {
         $addFields: {
           attending: {
@@ -396,7 +405,6 @@ export async function fetchTrainingsForUser(userEmail: string) {
               },
             },
           },
-          // isAttending is null or missing → unconfirmed
           unconfirmed: {
             $size: {
               $filter: {
@@ -413,7 +421,7 @@ export async function fetchTrainingsForUser(userEmail: string) {
         },
       },
 
-      // 7) Final shape
+      // 6) Final shape
       {
         $project: {
           _id: 0,
@@ -435,11 +443,11 @@ export async function fetchTrainingsForUser(userEmail: string) {
         },
       },
 
-      // 8) Sort by soonest
+      // 7) Sort
       { $sort: { date: 1, startTime: 1 } },
     ]);
 
-    return trainings; // always an array
+    return trainings;
   } catch (error) {
     console.error("Error fetching trainings for user:", error);
     throw new Error("Failed to fetch trainings");
