@@ -8,16 +8,13 @@ export default function Login() {
   const [email, setEmail] = createSignal("");
   const [password, setPassword] = createSignal("");
   const auth = useAuthStore();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
     await auth.actions.login(email(), password());
+    navigate("/", { replace: true });
   };
-  const navigate = useNavigate();
-
-  createEffect(() => {
-    auth.state.user?.email && navigate("/");
-  });
 
   return (
     <div class="hero min-h-screen bg-base-200">

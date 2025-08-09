@@ -80,6 +80,8 @@ const actions = {
       });
       //TODO: kinda nasty but it'll do for now
       if (!res.ok) throw new Error("error logging in");
+
+      setAuthState({ loading: false });
     } catch (err) {
       setAuthState({ error: "User or Password wrong", loading: false });
     }
