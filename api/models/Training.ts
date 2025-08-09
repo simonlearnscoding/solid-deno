@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { Training } from "../../types/Training";
+import { Training } from "../../types/Training.ts";
 
 const TrainingSchema: Schema = new Schema<Training>(
   {

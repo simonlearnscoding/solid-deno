@@ -3,6 +3,7 @@ import { User } from "./../../types/User.ts";
 
 const UserSchema: Schema = new Schema({
   password: { type: String, required: true },
+  roles: { type: [String], required: true, default: ["student"] },
   email: { type: String, required: true },
   name: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },

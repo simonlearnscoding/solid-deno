@@ -1,4 +1,4 @@
-import { Schema, model, models } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import type { TrainingAttendance } from "./../../types/TrainingAttendance.ts";
 
 const TrainingAttendanceSchema = new Schema<TrainingAttendance>(
@@ -12,5 +12,8 @@ const TrainingAttendanceSchema = new Schema<TrainingAttendance>(
   { timestamps: true },
 );
 
-export default (models.TrainingAttendance as any) ||
-  model<TrainingAttendance>("TrainingAttendance", TrainingAttendanceSchema);
+export default mongoose.models.TrainingAttendance ||
+  mongoose.model<TrainingAttendance>(
+    "TrainingAttendance",
+    TrainingAttendanceSchema,
+  );

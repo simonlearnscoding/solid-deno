@@ -1,5 +1,6 @@
-import { Schema, model, models } from "mongoose";
-import type { CourseMembership } from "../../types/CourseMembership";
+import { Schema } from "mongoose";
+import type { CourseMembership } from "../../types/CourseMembership.ts";
+import mongoose from "mongoose";
 
 const CourseMembershipSchema = new Schema<CourseMembership>(
   {
@@ -23,5 +24,5 @@ const CourseMembershipSchema = new Schema<CourseMembership>(
   { timestamps: true },
 );
 
-export default (models.CourseMembership as any) ||
-  model<CourseMembership>("CourseMembership", CourseMembershipSchema);
+export default mongoose.models.CourseMembership ||
+  mongoose.model<CourseMembership>("CourseMembership", CourseMembershipSchema);
