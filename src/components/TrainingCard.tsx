@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/solid-query";
 import { createSignal } from "solid-js";
 import { AiOutlineCalendar } from "solid-icons/ai";
 
-// import useMutateUpdateTrainingAttendance from "../hooks/mutations/useMutateUpdateTrainingAttendance.ts";
+import useMutateUpdateTrainingAttendance from "../hooks/mutations/useMutateUpdateTrainingAttendance.ts";
 import {
   FaSolidLocationDot,
   FaSolidCheck,
@@ -19,50 +19,18 @@ function formatShortDate(dateStr: string) {
     month: "short",
   });
 }
-type Input = {
-  isAttending: "present" | "absent";
-  trainingId: string;
-};
 
-const mutateFn = async (input: Input): Promise<any> => {
-  const res = await fetch(
-    `http://localhost:8000/trainings/${input.trainingId}`,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ isAttending: input.isAttending }),
-      credentials: "include",
-    },
-  );
-  if (!res.ok) throw new Error("Failed to update user attendance");
-  return res.json();
-};
 export default function TrainingCard({ training }: { training: Training }) {
-  const qc = useQueryClient();
   const [pending, setPending] = createSignal<"present" | "absent" | null>(null);
+  const mutation = useMutateUpdateTrainingAttendance();
 
-  const mutation = useMutation(() => ({
-    mutationFn: mutateFn,
-    onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ["upcoming-trainings"] });
-    },
-    onError: (err) => {
-      console.error(err);
-      // optional: show toast
-    },
-    onSettled: () => setPending(null),
-  }));
-
-  const clickPresent = () => {
-    setPending("present");
-    mutation.mutate({ isAttending: "present", trainingId: training.id });
-  };
-
-  const clickAbsent = () => {
-    setPending("absent");
-    mutation.mutate({ isAttending: "absent", trainingId: training.id });
+  const handleAttendance = async (status: "present" | "absent") => {
+    setPending(status);
+    await mutation.mutate({
+      isAttending: status,
+      trainingId: training.id,
+    });
+    setPending(null);
   };
   return (
     <div class="card card-sm bg-base-100 card-border rounded-md shadow-sm hover:bg-base-300 transition-colors w-full">
@@ -142,7 +110,7 @@ export default function TrainingCard({ training }: { training: Training }) {
         {/* Actions */}
         <div class="flex gap-2 mt-1">
           <button
-            onClick={clickPresent}
+            onClick={async () => await handleAttendance("present")}
             disabled={mutation.isPending}
             class={`btn flex-1 ${pending() === "present" && mutation.isPending ? "loading" : ""}`}
           >
@@ -152,7 +120,7 @@ export default function TrainingCard({ training }: { training: Training }) {
           </button>
 
           <button
-            onClick={clickAbsent}
+            onClick={async () => await handleAttendance("absent")}
             disabled={mutation.isPending}
             class={`btn btn-ghost flex-1 ${pending() === "absent" && mutation.isPending ? "loading" : ""}`}
           >

@@ -1,19 +1,19 @@
-import { useMutation } from "@tanstack/solid-query";
+import { useMutation, useQueryClient } from "@tanstack/solid-query";
 
-type Input = {
+type AttendanceInput = {
   isAttending: "present" | "absent";
   trainingId: string;
 };
 
-const mutateFn = async (input: Input): Promise<any> => {
+const mutateFn = async (input: AttendanceInput): Promise<any> => {
   const res = await fetch(
     `http://localhost:8000/trainings/${input.trainingId}`,
     {
-      method: "PATCH",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ target: input.isAttending }),
+      body: JSON.stringify({ isAttending: input.isAttending }),
       credentials: "include",
     },
   );
@@ -21,11 +21,18 @@ const mutateFn = async (input: Input): Promise<any> => {
   return res.json();
 };
 
-export default function useMutateUpdateTrainingAttendance() {
-  const mtn = () =>
-    useMutation({
-      //@ts-ignore
-      mutationFn: mutateFn,
-    });
-  return mtn;
+export default function useMutateTrainingAttendance() {
+  const queryClient = useQueryClient();
+
+  return useMutation(() => ({
+    mutationFn: mutateFn,
+    onSuccess: () => {
+      // Invalidate both upcoming and next training queries
+      queryClient.invalidateQueries({ queryKey: ["upcoming-trainings"] });
+      queryClient.invalidateQueries({ queryKey: ["next-training"] });
+    },
+    onError: (error) => {
+      console.error("Attendance update failed:", error);
+    },
+  }));
 }

@@ -8,7 +8,10 @@ import { setCookie, deleteCookie, getCookie } from "jsr:@hono/hono/cookie";
 
 import { verifyToken } from "../services/auth.ts";
 
-import { fetchTrainingsForUser } from "../services/trainings.ts";
+import {
+  fetchTrainingsForUser,
+  fetchNextTrainingForUser,
+} from "../services/trainings.ts";
 const users = new Hono();
 
 users.get("/me", async (c: Context) => {
@@ -48,6 +51,28 @@ users.get("/me", async (c: Context) => {
   }
 });
 
+users.get("/me/trainings/next", async (c) => {
+  try {
+    const token = getCookie(c, "token");
+    if (!token) throw new HTTPException(401, { message: "No token provided" });
+
+    const payload = await verifyToken(token); // throws if invalid/expired
+    if (!payload?.email)
+      throw new HTTPException(401, { message: "Invalid token payload" });
+
+    const next = await fetchNextTrainingForUser(payload.email as string);
+    console.log("next training:", next);
+    if (!next) return c.body(null, 204); // no content
+
+    return c.json(next, 200);
+  } catch (err: any) {
+    if (err.name === "JwtTokenExpired")
+      return c.json({ error: "Token expired" }, 401);
+    if (err instanceof HTTPException) return err.getResponse();
+    console.error("Unexpected error in /me/trainings/next:", err);
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
 users.get("/me/trainings", async (c: Context) => {
   try {
     console.log("Getting user trainings...");

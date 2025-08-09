@@ -1,22 +1,16 @@
+import useQueryNextTraining from "./../hooks/queries/useQueryNextTraining.ts";
+import { createEffect, Suspense } from "solid-js";
+import NextTrainingCard from "./NextTrainingCard.tsx";
+
 export default function RightSidebar(props: {}) {
   return (
     <div class="w-96  flex-col gap-3 p-4 bg-base-200 hidden xl:flex">
       <div class="card bg-base-100 rounded-md shadow-sm">
-        <div class="card-body">
-          <h4 class="font-semibold">Next Training</h4>
-          <h3>Soccer Practice</h3>
-          <div class="flex">
-            <p class="font-medium ">Tue, 12 Aug</p>
-            <div class="divider divider-horizontal mx-1" />
-
-            <p>18:00 - 19:00</p>
-          </div>
-
-          <div class="flex gap-2 mt-1">
-            <button class="btn  flex-1">Present</button>
-            <button class="btn btn-ghost flex-1">Absent</button>
-          </div>
-        </div>
+        <Suspense
+          fallback={<div class="skeleton h-48 bg-gray-200 rounded-md" />}
+        >
+          <NextTrainingCard />
+        </Suspense>
       </div>
 
       <div class="card bg-base-100 shadow-sm  rounded-md">
