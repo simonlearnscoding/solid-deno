@@ -4,6 +4,7 @@ import { createMemo, For, type Accessor } from "solid-js";
 import { AiFillHome } from "solid-icons/ai";
 import { AiOutlineSearch } from "solid-icons/ai";
 import { BsPersonFill } from "solid-icons/bs";
+import { useAuthStore } from "../stores/authStore.ts";
 
 const NAV = [
   {
@@ -43,6 +44,8 @@ const MobileBottomDock = ({ active }: { active: ActiveFn }) => {
 };
 
 const TopNavBar = ({ active }: { active: ActiveFn }) => {
+  const auth = useAuthStore();
+  const user = auth.state.user;
   return (
     <div class="navbar bg-base-100 shadow-sm hidden md:flex">
       {" "}
@@ -60,6 +63,18 @@ const TopNavBar = ({ active }: { active: ActiveFn }) => {
             )}
           </For>
         </ul>
+      </div>
+      <div class="">
+        <div class="rounded-full flex relative w-12 h-12">
+          <img
+            class="rounded-full w-full h-full object-cover"
+            src={
+              user?.avatarUrl ||
+              "https://api.dicebear.com/5.x/initials/svg?seed=User"
+            }
+            alt="User Avatar"
+          />
+        </div>
       </div>
     </div>
   );

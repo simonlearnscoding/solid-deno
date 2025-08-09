@@ -39,10 +39,8 @@ export default function Register() {
       name: name(),
       avatar: file() ?? undefined,
     });
-    if (auth.state.user) {
-      // Redirect to home or dashboard after successful registration
-      window.location.href = "/";
-    }
+    // Redirect to home or dashboard after successful registration
+    window.location.href = "/";
   };
 
   return (

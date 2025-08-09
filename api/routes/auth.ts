@@ -3,7 +3,6 @@ import { HTTPException } from "hono/http-exception"; // Add this import
 import { Context } from "jsr:@hono/hono";
 import { saveImageToUploads } from "../lib/uploadImage.ts";
 const isProd = Deno.env.get("NODE_ENV") === "production";
-console.log("env:", Deno.env.get("NODE_ENV"), isProd);
 
 import {
   verifyToken,

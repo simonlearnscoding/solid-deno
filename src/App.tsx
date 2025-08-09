@@ -1,6 +1,5 @@
 import { Route, Router } from "@solidjs/router";
 import Index from "./pages/Index.tsx";
-import Dinosaur from "./pages/Dinosaur.tsx";
 import AppLayout from "./layouts/AppLayout.tsx";
 import Profile from "./pages/Profile.tsx";
 import Search from "./pages/Search.tsx";
@@ -13,7 +12,6 @@ import "./App.css";
 
 const App = () => {
   const auth = useAuthStore();
-  console.log("be");
   onMount(() => {
     auth.actions.verifyToken();
 

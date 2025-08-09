@@ -28,19 +28,17 @@ type RegisterInput = {
 const actions = {
   async verifyToken() {
     try {
-      const res = await fetch("http://localhost:8000/auth/me", {
+      const res = await fetch("http://localhost:8000/users/me", {
         credentials: "include",
       });
       if (!res.ok) {
         throw new Error();
       }
-
-      //TODO: this should return more than just the email token lets just
-      //fetch the user one time won't hurt
       const resp = await res.json();
+      console.log(resp);
       setAuthState({ user: resp.user, loading: false });
     } catch (err: any) {
-      console.log("error getting token");
+      console.log("error getting token", err.message);
     }
   },
 
@@ -56,13 +54,11 @@ const actions = {
       const res = await fetch("http://localhost:8000/auth/register", {
         method: "POST",
         credentials: "include",
-        body: fd, // ⚠️ do NOT set Content-Type manually
+        body: fd,
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Registration failed");
-
-      setAuthState({ user: data.user, loading: false });
+      setAuthState({ loading: false });
     } catch (err: any) {
       setAuthState({
         error: err.message || "Registration failed",
@@ -84,10 +80,6 @@ const actions = {
       });
       //TODO: kinda nasty but it'll do for now
       if (!res.ok) throw new Error("error logging in");
-
-      const resp = await res.json();
-      console.log("resp", resp);
-      setAuthState({ user: resp.user, loading: false });
     } catch (err) {
       setAuthState({ error: "User or Password wrong", loading: false });
     }
