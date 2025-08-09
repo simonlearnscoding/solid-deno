@@ -1,13 +1,15 @@
-import { For } from "solid-js";
+import { For, Suspense } from "solid-js";
 import RightSidebar from "../components/RightSidebar.tsx";
+import useQueryUpcomingTrainings from "../hooks/queries/useQueryUpcomingTraining.ts";
 import LeftSidebar from "../components/LeftSidebar.tsx";
 import TrainingCard from "../components/TrainingCard.tsx";
-import { trainings } from "../data/trainings.ts";
+
 import { useAuthStore } from "../stores/authStore.ts";
 
 export default function Index() {
   const auth = useAuthStore();
   const user = auth.state.user;
+  const query = useQueryUpcomingTrainings();
   return (
     <div class="flex flex-col gap-3 px-4 pt-8 h-screen overflow-hidden">
       <div class="flex">
@@ -31,9 +33,15 @@ export default function Index() {
           {/* Scrollable content container */}
           <div class="flex-1 min-h-0 overflow-y-auto">
             <div class="flex flex-col gap-3 py-4">
-              <For each={trainings}>
-                {(training) => <TrainingCard training={training} />}
-              </For>
+              <Suspense
+                fallback={Array.from({ length: 8 }, (_, i) => (
+                  <div class="skeleton w-full h-48 bg-gray-200 rounded-lg"></div>
+                ))}
+              >
+                <For each={query.data}>
+                  {(training) => <TrainingCard training={training} />}
+                </For>
+              </Suspense>
             </div>
           </div>
         </div>

@@ -1,13 +1,20 @@
-import { type Training } from "../data/trainings.ts";
+import { type Training } from "./../../types/index.ts";
 import { AiOutlineCalendar } from "solid-icons/ai";
 import {
   FaSolidLocationDot,
-  FaSolidUser,
   FaSolidCheck,
   FaSolidXmark,
   FaSolidQuestion,
 } from "solid-icons/fa";
 
+function formatShortDate(dateStr: string) {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("en-US", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+  });
+}
 export default function TrainingCard({ training }: { training: Training }) {
   return (
     <div class="card card-sm bg-base-100 card-border rounded-md shadow-sm hover:bg-base-300 transition-colors w-full">
@@ -37,18 +44,20 @@ export default function TrainingCard({ training }: { training: Training }) {
         {/* Date/Time + Attendance chips on the same row */}
         <div class="flex items-center gap-2">
           <AiOutlineCalendar class="w-5 h-5 opacity-80" />
-          <p class="text-sm text-base-content/70">Tue, 12 Aug</p>
+          <p class="text-sm text-base-content/70">
+            {formatShortDate(training.date)}
+          </p>
 
           <div class="divider divider-horizontal mx-1" />
           <p class="ml-auto  text-end text-sm text-base-content/80">
-            18:00 – 19:00
+            {training.startTime} - {training.endTime}
           </p>
         </div>
 
         {/* Location */}
         <div class="flex items-center gap-2">
           <FaSolidLocationDot class="w-5 h-5 opacity-80" />
-          <p class="text-base-content/90">Downtown Gym</p>
+          <p class="text-base-content/90">{training.location}</p>
 
           {/* compact chips */}
           <div class="flex items-center gap-1 ml-2">
@@ -59,7 +68,7 @@ export default function TrainingCard({ training }: { training: Training }) {
               aria-label="Present"
             >
               <FaSolidCheck class="w-3.5 h-3.5" />
-              {6}
+              {training.attending}
             </span>
             {/* Maybe / undecided */}
             <span
@@ -68,7 +77,7 @@ export default function TrainingCard({ training }: { training: Training }) {
               aria-label="Maybe"
             >
               <FaSolidQuestion class="w-3.5 h-3.5" />
-              {2}
+              {training.unconfirmed}
             </span>
             {/* Absent */}
             <span
@@ -77,7 +86,7 @@ export default function TrainingCard({ training }: { training: Training }) {
               aria-label="Absent"
             >
               <FaSolidXmark class="w-3.5 h-3.5" />
-              {3}
+              {training.declined}
             </span>
           </div>
         </div>
