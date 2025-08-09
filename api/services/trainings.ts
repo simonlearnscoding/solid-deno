@@ -2,6 +2,37 @@
 import { Types } from "mongoose";
 import User from "../models/User.ts";
 import Training from "../models/Training.ts";
+import TrainingAttendance from "../models/TrainingAttendance.ts";
+
+export async function upsertTrainingAttendance(
+  trainingId: string,
+  userEmail: string,
+  isAttending: "present" | "absent" | "pending",
+) {
+  try {
+    const userDoc = await User.findOne({ email: userEmail }).select("_id");
+    if (!userDoc) throw new Error(`User with email ${userEmail} not found`);
+    if (!Types.ObjectId.isValid(trainingId)) {
+      throw new Error(`Invalid training ID: ${trainingId}`);
+    }
+    await await TrainingAttendance.findOneAndUpdate(
+      {
+        training: trainingId,
+        user: userDoc._id,
+      },
+      {
+        isAttending,
+      },
+      {
+        upsert: true, // Create if not exists
+        new: true, // Return the updated document
+      },
+    );
+  } catch (error) {
+    console.error("Error updating training attendance:", error);
+    throw new Error("Failed to update attendance");
+  }
+}
 
 export async function fetchTrainingsForUser(userEmail: string) {
   try {
