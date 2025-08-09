@@ -1,37 +1,57 @@
 // services/trainings.ts
+// services/trainings.ts
 import { Types } from "mongoose";
 import User from "../models/User.ts";
-import Training from "../models/Training.ts";
 import TrainingAttendance from "../models/TrainingAttendance.ts";
+import Training from "../models/Training.ts";
 
-export async function upsertTrainingAttendance(
+type Status = "present" | "pending" | "absent";
+
+export async function upsertTrainingAttendanceToggle(
   trainingId: string,
   userEmail: string,
-  isAttending: "present" | "absent" | "pending",
-) {
-  try {
-    const userDoc = await User.findOne({ email: userEmail }).select("_id");
-    if (!userDoc) throw new Error(`User with email ${userEmail} not found`);
-    if (!Types.ObjectId.isValid(trainingId)) {
-      throw new Error(`Invalid training ID: ${trainingId}`);
-    }
-    await await TrainingAttendance.findOneAndUpdate(
-      {
-        training: trainingId,
-        user: userDoc._id,
-      },
-      {
-        isAttending,
-      },
-      {
-        upsert: true, // Create if not exists
-        new: true, // Return the updated document
-      },
-    );
-  } catch (error) {
-    console.error("Error updating training attendance:", error);
-    throw new Error("Failed to update attendance");
+  target?: "present" | "absent",
+): Promise<{ status: Status; updatedAt: string }> {
+  const now = new Date();
+
+  const user = await User.findOne({ email: userEmail });
+  if (!user?._id) throw new Error(`User with email ${userEmail} not found`);
+  if (!Types.ObjectId.isValid(trainingId)) {
+    throw new Error(`Invalid training ID: ${trainingId}`);
   }
+
+  // Read current status
+  const current = await TrainingAttendance.findOne({
+    training: new Types.ObjectId(trainingId),
+    user: user._id,
+  });
+
+  let next: Status;
+
+  if (typeof target !== "undefined") {
+    // if the user clicked the same state again, go back to pending
+    if (current?.isAttending === target) {
+      next = "pending";
+    } else {
+      next = target; // "present" or "absent"
+    }
+  } else {
+    // (optional) fallback toggle when client doesn't send a target
+    if (current?.isAttending === "present") next = "pending";
+    else if (current?.isAttending === "absent") next = "pending";
+    else next = "present";
+  }
+
+  await TrainingAttendance.updateOne(
+    { training: new Types.ObjectId(trainingId), user: user._id },
+    {
+      $set: { isAttending: next, updatedAt: now },
+      $setOnInsert: { createdAt: now },
+    },
+    { upsert: true },
+  );
+
+  return { status: next, updatedAt: now.toISOString() };
 }
 
 export async function fetchTrainingsForUser(userEmail: string) {

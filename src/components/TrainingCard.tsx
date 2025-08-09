@@ -1,5 +1,9 @@
 import { type Training } from "./../../types/index.ts";
+import { useMutation, useQueryClient } from "@tanstack/solid-query";
+import { createSignal } from "solid-js";
 import { AiOutlineCalendar } from "solid-icons/ai";
+
+// import useMutateUpdateTrainingAttendance from "../hooks/mutations/useMutateUpdateTrainingAttendance.ts";
 import {
   FaSolidLocationDot,
   FaSolidCheck,
@@ -15,7 +19,51 @@ function formatShortDate(dateStr: string) {
     month: "short",
   });
 }
+type Input = {
+  isAttending: "present" | "absent";
+  trainingId: string;
+};
+
+const mutateFn = async (input: Input): Promise<any> => {
+  const res = await fetch(
+    `http://localhost:8000/trainings/${input.trainingId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ isAttending: input.isAttending }),
+      credentials: "include",
+    },
+  );
+  if (!res.ok) throw new Error("Failed to update user attendance");
+  return res.json();
+};
 export default function TrainingCard({ training }: { training: Training }) {
+  const qc = useQueryClient();
+  const [pending, setPending] = createSignal<"present" | "absent" | null>(null);
+
+  const mutation = useMutation(() => ({
+    mutationFn: mutateFn,
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["upcoming-trainings"] });
+    },
+    onError: (err) => {
+      console.error(err);
+      // optional: show toast
+    },
+    onSettled: () => setPending(null),
+  }));
+
+  const clickPresent = () => {
+    setPending("present");
+    mutation.mutate({ isAttending: "present", trainingId: training.id });
+  };
+
+  const clickAbsent = () => {
+    setPending("absent");
+    mutation.mutate({ isAttending: "absent", trainingId: training.id });
+  };
   return (
     <div class="card card-sm bg-base-100 card-border rounded-md shadow-sm hover:bg-base-300 transition-colors w-full">
       <div class="card-body">
@@ -93,9 +141,33 @@ export default function TrainingCard({ training }: { training: Training }) {
 
         {/* Actions */}
         <div class="flex gap-2 mt-1">
-          <button class="btn  flex-1">Present</button>
-          <button class="btn btn-ghost flex-1">Absent</button>
+          <button
+            onClick={clickPresent}
+            disabled={mutation.isPending}
+            class={`btn flex-1 ${pending() === "present" && mutation.isPending ? "loading" : ""}`}
+          >
+            {pending() === "present" && mutation.isPending
+              ? "Saving..."
+              : "Present"}
+          </button>
+
+          <button
+            onClick={clickAbsent}
+            disabled={mutation.isPending}
+            class={`btn btn-ghost flex-1 ${pending() === "absent" && mutation.isPending ? "loading" : ""}`}
+          >
+            {pending() === "absent" && mutation.isPending
+              ? "Saving..."
+              : "Absent"}
+          </button>
         </div>
+
+        {/* Optional inline error */}
+        {mutation.isError && (
+          <p class="text-error text-sm mt-2">
+            {(mutation.error as Error)?.message ?? "Update failed"}
+          </p>
+        )}
       </div>
     </div>
   );

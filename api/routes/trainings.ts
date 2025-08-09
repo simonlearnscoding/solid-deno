@@ -1,57 +1,64 @@
-// routes/trainings.ts
 import { Hono } from "@hono/hono";
 import { HTTPException } from "hono/http-exception";
 import { Context } from "jsr:@hono/hono";
 import { Types } from "mongoose";
 import { verifyToken } from "../services/auth.ts";
-import { upsertTrainingAttendance } from "../services/trainings.ts";
+import { upsertTrainingAttendanceToggle } from "../services/trainings.ts";
 
+import { getCookie } from "jsr:@hono/hono/cookie";
 const trainings = new Hono();
 
-type Rsvp = "present" | "absent" | "pending";
-function isRsvp(x: unknown): x is Rsvp {
-  return x === "present" || x === "absent" || x === "pending";
-}
+type Target = "present" | "absent"; // only when client wants an explicit state
 
-trainings.patch("/:id", async (c: Context) => {
+trainings.put("/:id", async (c: Context) => {
   try {
+    console.log("Updating training attendance...");
     const trainingId = c.req.param("id");
+    console.log("param trainingId:", trainingId);
     if (!trainingId || !Types.ObjectId.isValid(trainingId)) {
       throw new HTTPException(400, { message: "Invalid training ID" });
     }
 
-    // parse body (await!)
-    let body: any;
+    // Optional body (explicit set). If missing → toggle.
+    let target: Target | undefined = undefined;
     try {
-      body = await c.req.json();
+      const maybeJson = await c.req.json();
+      if (
+        maybeJson &&
+        (maybeJson.isAttending === "present" ||
+          maybeJson.isAttending === "absent")
+      ) {
+        target = maybeJson.isAttending;
+      }
     } catch {
-      throw new HTTPException(400, { message: "Body must be JSON" });
-    }
-    const isAttending = body?.isAttending;
-    if (!isRsvp(isAttending)) {
-      throw new HTTPException(400, { message: "Invalid isAttending value" });
+      /* ignore — treat as toggle */
     }
 
-    // auth (Bearer <token>)
-    const token = c.req.header("Authorization")?.replace("Bearer ", "");
+    const token = getCookie(c, "token");
     if (!token) throw new HTTPException(401, { message: "No token provided" });
     const payload = await verifyToken(token);
     if (!payload?.email)
       throw new HTTPException(401, { message: "Invalid token" });
-
-    const updated = await upsertTrainingAttendance(
+    console.log("target:", target);
+    const result = await upsertTrainingAttendanceToggle(
       trainingId,
       payload.email as string,
-      isAttending,
+      target,
     );
 
+    console.log("result:", result);
     return c.json(
-      { message: "Training updated successfully", updatedTraining: updated },
+      {
+        message: "Attendance updated",
+        trainingId,
+        status: result.status, // "present" | "pending" | "absent"
+        updatedAt: result.updatedAt,
+      },
       200,
     );
   } catch (err) {
     if (err instanceof HTTPException) return err.getResponse();
-    console.error("Unexpected error in /trainings/:id:", err);
+    console.error("Unexpected error in PATCH /trainings/:id:", err);
     return c.json({ error: "Internal server error" }, 500);
   }
 });

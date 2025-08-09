@@ -13,9 +13,11 @@ import "./App.css";
 const App = () => {
   const auth = useAuthStore();
   onMount(() => {
-    auth.actions.verifyToken();
-
-    document.documentElement.setAttribute("data-theme", "winter");
+    console.log(auth.state.user);
+    if (!auth.state.user) {
+      auth.actions.verifyToken();
+      document.documentElement.setAttribute("data-theme", "winter");
+    }
   });
   //TODO: protect routes when user not logged in
   const queryClient = new QueryClient();

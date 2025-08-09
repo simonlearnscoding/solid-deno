@@ -61,9 +61,7 @@ users.get("/me/trainings", async (c: Context) => {
       throw new HTTPException(401, { message: "Invalid token payload" });
     }
 
-    const res = await fetchTrainingsForUser(payload.email);
-    console.log("Fetched trainings for user:", payload.email);
-    console.log(res);
+    const res = await fetchTrainingsForUser(payload.email as string);
     // trainings return
 
     return c.json(res, 200);

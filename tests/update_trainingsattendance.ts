@@ -4,7 +4,6 @@ import {
 } from "https://deno.land/std@0.224.0/testing/asserts.ts";
 import { BASE_URL, randomEmail, register, login } from "./_helpers.ts";
 
-// Pull the JWT value (token=...) from Set-Cookie and return just the token string.
 function extractTokenFromSetCookie(headers: Headers): string | null {
   const any = headers as any;
   const setCookies: string[] =
@@ -16,7 +15,6 @@ function extractTokenFromSetCookie(headers: Headers): string | null {
         .map(([, v]) => v);
 
   for (const sc of all) {
-    // Example: token=eyJhbGciOi...; Path=/; HttpOnly; ...
     const m = sc.match(/\btoken=([^;]+)/);
     if (m) return m[1];
   }
@@ -29,31 +27,24 @@ async function getAnyUpcomingTrainingId(
   const res = await fetch(`${BASE_URL}/users/me/trainings`, {
     headers: { Cookie: cookieHeader },
   });
-
   if (res.status === 204) {
-    await res.text(); // drain
+    await res.text();
     return null;
   }
-  if (!res.ok) {
-    throw new Error(
-      `Failed to fetch trainings: ${res.status} ${await res.text()}`,
-    );
-  }
-  const text = await res.text();
-  const data = text ? JSON.parse(text) : [];
+  const txt = await res.text();
+  if (!res.ok) throw new Error(`trainings failed: ${res.status} ${txt}`);
+  const data = txt ? JSON.parse(txt) : [];
   if (!Array.isArray(data) || data.length === 0) return null;
-  // each item should have id
   return data[0]?.id ?? null;
 }
 
 Deno.test(
-  "PATCH /trainings/:id sets attendance (present) with Bearer token",
+  "PATCH /trainings/:id (toggle, no body) → present then pending",
   async () => {
+    // You can use a fixed seeded user if you prefer
     const email = randomEmail();
     const password = "Password123!";
-    const name = "Attend Happy Path";
-
-    // Register & login
+    const name = "Toggle Test";
     const reg = await register(email, password, name);
     assert(
       reg.status === 200,
@@ -63,105 +54,101 @@ Deno.test(
     const log = await login(email, password);
     assert(log.status === 200, `login failed: ${log.status} ${log.bodyText}`);
 
-    // Extract JWT from Set-Cookie and also keep Cookie header for GET calls
     const bearer = extractTokenFromSetCookie(log.headers);
-    assert(!!bearer, "could not extract token cookie for Bearer auth");
-    const authorization = `Bearer ${bearer}`;
-
-    // Get any upcoming training id
-    const trainingId = await getAnyUpcomingTrainingId(log.cookie);
-    if (!trainingId) {
-      console.warn("[SKIP] No upcoming trainings available to patch.");
-      return;
-    }
-
-    // Patch attendance
-    const res = await fetch(`${BASE_URL}/trainings/${trainingId}`, {
-      method: "PATCH",
-      headers: {
-        "content-type": "application/json",
-        Authorization: authorization,
-      },
-      body: JSON.stringify({ isAttending: "present" }),
-    });
-
-    const body = await res.text(); // consume once
-    assert(res.ok, `expected 200, got ${res.status}. Body: ${body}`);
-
-    // Optionally check message
-    try {
-      const json = JSON.parse(body);
-      assertEquals(json?.message, "Training updated successfully");
-    } catch {
-      // ignore shape if not strict yet
-    }
-  },
-);
-
-Deno.test(
-  "PATCH /trainings/:id without Authorization returns 401",
-  async () => {
-    // We still need a real training id to hit the route
-    const email = randomEmail();
-    const password = "Password123!";
-    const name = "Attend 401";
-
-    const reg = await register(email, password, name);
-    assert(
-      reg.status === 200,
-      `register failed: ${reg.status} ${reg.bodyText}`,
-    );
-    const log = await login(email, password);
-    assert(log.status === 200, `login failed: ${log.status} ${log.bodyText}`);
+    assert(!!bearer, "failed to extract token");
+    const auth = `Bearer ${bearer}`;
 
     const trainingId = await getAnyUpcomingTrainingId(log.cookie);
     if (!trainingId) {
-      console.warn("[SKIP] No upcoming trainings available to test 401.");
+      console.warn("[SKIP] No upcoming trainings to toggle.");
       return;
     }
 
-    const res = await fetch(`${BASE_URL}/trainings/${trainingId}`, {
+    // First toggle — should set to "present"
+    const r1 = await fetch(`${BASE_URL}/trainings/${trainingId}`, {
       method: "PATCH",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ isAttending: "present" }),
+      headers: { Authorization: auth },
     });
-    const text = await res.text();
-    assertEquals(
-      res.status,
-      401,
-      `Expected 401, got ${res.status}. Body: ${text}`,
-    );
+    const t1 = await r1.text();
+    assert(r1.ok, `toggle 1 failed: ${r1.status} ${t1}`);
+    const j1 = JSON.parse(t1);
+    assertEquals(j1.status, "present");
+
+    // Second toggle — should set to "pending"
+    const r2 = await fetch(`${BASE_URL}/trainings/${trainingId}`, {
+      method: "PATCH",
+      headers: { Authorization: auth },
+    });
+    const t2 = await r2.text();
+    assert(r2.ok, `toggle 2 failed: ${r2.status} ${t2}`);
+    const j2 = JSON.parse(t2);
+    assertEquals(j2.status, "pending");
   },
 );
 
-Deno.test("PATCH /trainings/:id with invalid id returns 400", async () => {
+Deno.test("PATCH /trainings/:id explicit set to absent", async () => {
   const email = randomEmail();
   const password = "Password123!";
-  const name = "Attend 400";
-
+  const name = "Explicit Set Test";
   const reg = await register(email, password, name);
   assert(reg.status === 200, `register failed: ${reg.status} ${reg.bodyText}`);
+
   const log = await login(email, password);
   assert(log.status === 200, `login failed: ${log.status} ${log.bodyText}`);
 
   const bearer = extractTokenFromSetCookie(log.headers);
-  assert(!!bearer, "could not extract token cookie for Bearer auth");
-  const authorization = `Bearer ${bearer}`;
+  assert(!!bearer, "failed to extract token");
+  const auth = `Bearer ${bearer}`;
 
-  const res = await fetch(`${BASE_URL}/trainings/not-a-valid-id`, {
+  const trainingId = await getAnyUpcomingTrainingId(log.cookie);
+  if (!trainingId) {
+    console.warn("[SKIP] No upcoming trainings to set absent.");
+    return;
+  }
+
+  const res = await fetch(`${BASE_URL}/trainings/${trainingId}`, {
     method: "PATCH",
     headers: {
       "content-type": "application/json",
-      Authorization: authorization,
+      Authorization: auth,
     },
-    body: JSON.stringify({ isAttending: "present" }),
+    body: JSON.stringify({ isAttending: "absent" }),
   });
+  const txt = await res.text();
+  assert(res.ok, `explicit set failed: ${res.status} ${txt}`);
+  const json = JSON.parse(txt);
+  assertEquals(json.status, "absent");
+});
 
-  const text = await res.text();
-  // Your handler throws 400 when id is missing but not when it's *invalid*;
-  // ideally you should add ObjectId validation. For now, accept 400..499.
-  assert(
-    res.status >= 400 && res.status < 500,
-    `Expected 4xx, got ${res.status}. Body: ${text}`,
+Deno.test("PATCH /trainings/:id 401 when no Authorization", async () => {
+  const res = await fetch(`${BASE_URL}/trainings/64a1f2c8a1f2c8a1f2c8a1f2`, {
+    method: "PATCH",
+  });
+  const body = await res.text();
+  assertEquals(
+    res.status,
+    401,
+    `Expected 401, got ${res.status}. Body: ${body}`,
+  );
+});
+
+Deno.test("PATCH /trainings/:id 400 invalid id", async () => {
+  const email = randomEmail();
+  const password = "Password123!";
+  const name = "BadId";
+  await register(email, password, name);
+  const log = await login(email, password);
+  const bearer = extractTokenFromSetCookie(log.headers);
+  const auth = `Bearer ${bearer}`;
+
+  const res = await fetch(`${BASE_URL}/trainings/not-a-valid-id`, {
+    method: "PATCH",
+    headers: { Authorization: auth },
+  });
+  const body = await res.text();
+  assertEquals(
+    res.status,
+    400,
+    `Expected 400, got ${res.status}. Body: ${body}`,
   );
 });
