@@ -7,6 +7,140 @@ import Training from "../models/Training.ts";
 
 type Status = "present" | "pending" | "absent";
 
+export async function fetchThisWeekConfirmedTrainings(userEmail: string) {
+  const now = new Date();
+
+  const start = new Date(); // now
+  const end = new Date();
+  end.setDate(start.getDate() + 7);
+
+  const userDoc = await User.findOne({ email: userEmail }).select("_id");
+  if (!userDoc) throw new Error(`User with email ${userEmail} not found`);
+
+  const trainings = await Training.aggregate([
+    // In this week
+    { $match: { startsAt: { $gte: start, $lt: end } } },
+
+    // This user's attendance → only "present"
+    {
+      $lookup: {
+        from: "trainingattendances",
+        let: { tid: "$_id", uid: userDoc._id },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$training", "$$tid"] },
+                  { $eq: ["$user", "$$uid"] },
+                  { $eq: ["$isAttending", "present"] },
+                ],
+              },
+            },
+          },
+          { $project: { _id: 1 } }, // presence-only
+        ],
+        as: "mine",
+      },
+    },
+    // Keep only those with at least one matching row
+    { $match: { $expr: { $gt: [{ $size: "$mine" }, 0] } } },
+
+    // Trainer & Course
+    {
+      $lookup: {
+        from: "users",
+        localField: "trainer",
+        foreignField: "_id",
+        as: "trainerDoc",
+      },
+    },
+    { $unwind: "$trainerDoc" },
+    {
+      $lookup: {
+        from: "courses",
+        localField: "course",
+        foreignField: "_id",
+        as: "courseDoc",
+      },
+    },
+    { $unwind: "$courseDoc" },
+
+    // Counts (optional, for badges)
+    {
+      $lookup: {
+        from: "trainingattendances",
+        localField: "_id",
+        foreignField: "training",
+        as: "attAll",
+      },
+    },
+    {
+      $addFields: {
+        attending: {
+          $size: {
+            $filter: {
+              input: "$attAll",
+              as: "a",
+              cond: { $eq: ["$$a.isAttending", "present"] },
+            },
+          },
+        },
+        declined: {
+          $size: {
+            $filter: {
+              input: "$attAll",
+              as: "a",
+              cond: { $eq: ["$$a.isAttending", "absent"] },
+            },
+          },
+        },
+        unconfirmed: {
+          $size: {
+            $filter: {
+              input: "$attAll",
+              as: "a",
+              cond: { $eq: ["$$a.isAttending", "pending"] },
+            },
+          },
+        },
+      },
+    },
+
+    // Shape (match your other endpoints)
+    {
+      $project: {
+        _id: 0,
+        id: { $toString: "$_id" },
+        title: 1,
+        description: 1,
+        location: 1,
+        startsAt: 1,
+        endsAt: 1,
+        date: { $dateToString: { date: "$startsAt", format: "%Y-%m-%d" } },
+        startTime: { $dateToString: { date: "$startsAt", format: "%H:%M" } },
+        endTime: { $dateToString: { date: "$endsAt", format: "%H:%M" } },
+        attending: 1,
+        declined: 1,
+        unconfirmed: 1,
+        trainer: {
+          name: "$trainerDoc.name",
+          avatarUrl: "$trainerDoc.avatarUrl",
+        },
+        course: {
+          id: { $toString: "$courseDoc._id" },
+          title: "$courseDoc.title",
+          imageUrl: "$courseDoc.imageUrl",
+        },
+        imageUrl: { $ifNull: ["$imageUrl", "$courseDoc.imageUrl"] },
+      },
+    },
+
+    { $sort: { startsAt: 1 } },
+  ]);
+
+  return trainings; // [] when none
+}
 export async function upsertTrainingAttendanceToggle(
   trainingId: string,
   userEmail: string,

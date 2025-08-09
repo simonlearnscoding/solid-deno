@@ -30,6 +30,9 @@ export default function useMutateTrainingAttendance() {
       // Invalidate both upcoming and next training queries
       queryClient.invalidateQueries({ queryKey: ["upcoming-trainings"] });
       queryClient.invalidateQueries({ queryKey: ["next-training"] });
+      queryClient.invalidateQueries({
+        queryKey: ["this-week", "confirmed-trainings"],
+      });
     },
     onError: (error) => {
       console.error("Attendance update failed:", error);

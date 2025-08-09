@@ -11,6 +11,7 @@ import { verifyToken } from "../services/auth.ts";
 import {
   fetchTrainingsForUser,
   fetchNextTrainingForUser,
+  fetchThisWeekConfirmedTrainings,
 } from "../services/trainings.ts";
 const users = new Hono();
 
@@ -50,7 +51,28 @@ users.get("/me", async (c: Context) => {
     return c.json({ error: "Internal server error" }, 500);
   }
 });
+users.get("/me/trainings/week/confirmed", async (c: Context) => {
+  try {
+    const token = getCookie(c, "token");
+    if (!token) throw new HTTPException(401, { message: "No token provided" });
 
+    const payload = await verifyToken(token);
+    if (!payload?.email)
+      throw new HTTPException(401, { message: "Invalid token payload" });
+
+    const list = await fetchThisWeekConfirmedTrainings(payload.email as string);
+
+    // For lists, prefer 200 with [] instead of 204 – simpler for the client.
+    console.log("Confirmed trainings for this week:", list);
+    return c.json(list, 200);
+  } catch (err: any) {
+    if (err.name === "JwtTokenExpired")
+      return c.json({ error: "Token expired" }, 401);
+    if (err instanceof HTTPException) return err.getResponse();
+    console.error("Unexpected error in /me/trainings/week/confirmed:", err);
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
 users.get("/me/trainings/next", async (c) => {
   try {
     const token = getCookie(c, "token");
