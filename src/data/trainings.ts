@@ -9,7 +9,8 @@ export type Training = {
   startTime: string; // HH:mm
   endTime: string; // HH:mm
   location: string;
-  capacity: number;
+  declined: number; // Number of users who declined
+  unconfirmed: number; // Number of users who haven't confirmed
   attending: number;
   category: string; // For color-coding or grouping
   imageUrl: string; // Representative training image
@@ -28,8 +29,9 @@ export const trainings: Training[] = [
     startTime: "10:00",
     endTime: "11:00",
     location: "Downtown Gym",
-    capacity: 15,
     attending: 12,
+    declined: 3,
+    unconfirmed: 3,
     category: "Boxing",
     imageUrl:
       "https://plus.unsplash.com/premium_photo-1681400614910-2e80fa375521?q=80&w=977&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // boxing gloves
@@ -46,7 +48,8 @@ export const trainings: Training[] = [
     startTime: "16:00",
     endTime: "17:30",
     location: "Greenfield Park",
-    capacity: 22,
+    declined: 3,
+    unconfirmed: 5,
     attending: 20,
     category: "Soccer",
     imageUrl:
@@ -64,7 +67,8 @@ export const trainings: Training[] = [
     startTime: "09:00",
     endTime: "10:00",
     location: "Fitness Center",
-    capacity: 12,
+    declined: 3,
+    unconfirmed: 5,
     attending: 10,
     category: "Strength",
     imageUrl:
@@ -82,7 +86,8 @@ export const trainings: Training[] = [
     startTime: "18:00",
     endTime: "19:15",
     location: "Wellness Studio",
-    capacity: 18,
+    declined: 3,
+    unconfirmed: 5,
     attending: 15,
     category: "Yoga",
     imageUrl:
@@ -100,7 +105,8 @@ export const trainings: Training[] = [
     startTime: "07:00",
     endTime: "07:45",
     location: "Main Gym Hall",
-    capacity: 20,
+    declined: 3,
+    unconfirmed: 5,
     attending: 19,
     category: "HIIT",
     imageUrl:
@@ -118,7 +124,8 @@ export const trainings: Training[] = [
     startTime: "15:00",
     endTime: "16:00",
     location: "Community Pool",
-    capacity: 10,
+    declined: 3,
+    unconfirmed: 5,
     attending: 8,
     category: "Swimming",
     imageUrl:
@@ -136,7 +143,8 @@ export const trainings: Training[] = [
     startTime: "11:30",
     endTime: "12:30",
     location: "Downtown Gym",
-    capacity: 15,
+    declined: 3,
+    unconfirmed: 5,
     attending: 13,
     category: "Boxing",
     imageUrl:
@@ -154,7 +162,8 @@ export const trainings: Training[] = [
     startTime: "17:00",
     endTime: "18:00",
     location: "Wellness Studio",
-    capacity: 14,
+    declined: 3,
+    unconfirmed: 5,
     attending: 12,
     category: "Pilates",
     imageUrl:
@@ -172,7 +181,8 @@ export const trainings: Training[] = [
     startTime: "06:30",
     endTime: "07:30",
     location: "CrossFit Arena",
-    capacity: 16,
+    declined: 3,
+    unconfirmed: 5,
     attending: 15,
     category: "CrossFit",
     imageUrl:
@@ -190,7 +200,8 @@ export const trainings: Training[] = [
     startTime: "08:00",
     endTime: "09:00",
     location: "City Park Entrance",
-    capacity: 25,
+    declined: 3,
+    unconfirmed: 5,
     attending: 23,
     category: "Running",
     imageUrl:
