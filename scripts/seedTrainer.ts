@@ -11,8 +11,9 @@ async function seedTrainer() {
   const trainer = await User.create({
     email: "trainer@example.com",
     password: "hashed_password_here", // pre-hash or seed plain if dev-only
-    name: "Trainer Tony",
-    avatarUrl: "https://placehold.co/100x100",
+    name: "Gina Lawson",
+    avatarUrl:
+      "https://plus.unsplash.com/premium_photo-1689551671541-31a345ce6ae0?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8YXZhdGFyc3xlbnwwfHwwfHx8MA%3D%3D",
     roles: ["trainer"], // if you store roles
   });
 

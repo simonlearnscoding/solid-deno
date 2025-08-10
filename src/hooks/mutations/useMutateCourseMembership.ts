@@ -31,6 +31,10 @@ export default function useMutateCourseMembership() {
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: ["upcoming-trainings"],
+        }),
+
+        queryClient.invalidateQueries({
+          queryKey: ["courses", "my"],
           exact: true,
         }),
         queryClient.invalidateQueries({
@@ -41,6 +45,7 @@ export default function useMutateCourseMembership() {
           queryKey: ["this-week", "confirmed-trainings"],
           exact: true,
         }),
+
         queryClient.invalidateQueries({
           queryKey: ["courses", "detail", vars.trainingId],
           exact: true,

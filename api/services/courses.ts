@@ -1,7 +1,68 @@
-import { Types } from "mongoose";
 import Course from "../models/Course.ts"; // see model below
 import User from "../models/User.ts";
 import CourseMembership from "../models/CourseMembership.ts";
+
+import { Types } from "mongoose";
+
+type LeanId = { _id: Types.ObjectId };
+
+export async function getMyCourses(userMail: string) {
+  // 1) Get user id
+  const user = await User.findOne({ email: userMail })
+    .select("_id")
+    .lean<LeanId | null>();
+
+  if (!user?._id) throw new Error(`User with email ${userMail} not found`);
+
+  // 2) Fetch memberships and populate course + trainer
+  const memberships = await CourseMembership.find({
+    user: user._id,
+    status: "active",
+  })
+    .select("course")
+    .populate({
+      path: "course",
+      select: "_id title description imageUrl tags trainer",
+      populate: { path: "trainer", select: "_id name avatarUrl" },
+    })
+    .lean<
+      Array<{
+        course: {
+          _id: Types.ObjectId;
+          title: string;
+          description?: string;
+          imageUrl?: string;
+          tags?: string[];
+          trainer?: {
+            _id: Types.ObjectId;
+            name: string;
+            avatarUrl?: string;
+          } | null;
+        } | null;
+      }>
+    >();
+
+  // 3) Map _id -> id and filter null courses
+  return memberships
+    .map((m) => {
+      if (!m.course) return null;
+      return {
+        id: m.course._id.toString(),
+        title: m.course.title,
+        description: m.course.description,
+        imageUrl: m.course.imageUrl,
+        tags: m.course.tags,
+        trainer: m.course.trainer
+          ? {
+              id: m.course.trainer._id.toString(),
+              name: m.course.trainer.name,
+              avatarUrl: m.course.trainer.avatarUrl,
+            }
+          : undefined,
+      };
+    })
+    .filter(Boolean);
+}
 export async function fetchCourses() {
   // Sort by most recently created; change to title if you prefer
   const docs = await Course.find({})

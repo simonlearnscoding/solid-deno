@@ -199,6 +199,31 @@ export async function fetchNextTrainingForUser(userEmail: string) {
     // 1) Only future trainings
     { $match: { startsAt: { $gte: now } } },
 
+    // 1.5) Keep only trainings where I have an ACTIVE membership in the course
+    {
+      $lookup: {
+        from: "coursememberships", // <- check your actual collection name
+        let: { cid: "$course", uid: userId },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$course", "$$cid"] },
+                  { $eq: ["$user", "$$uid"] },
+                  { $eq: ["$status", "active"] },
+                ],
+              },
+            },
+          },
+          { $project: { _id: 1 } },
+        ],
+        as: "myMembership",
+      },
+    },
+    // require at least one active membership row
+    { $match: { $expr: { $gt: [{ $size: "$myMembership" }, 0] } } },
+
     // 2) This user's attendance (left join)
     {
       $lookup: {
@@ -344,10 +369,34 @@ export async function fetchTrainingsForUser(userEmail: string, q?: string) {
     }
 
     const trainings = await Training.aggregate([
-      // 1) Filter: upcoming + optional search
+      // 1) Upcoming (and optional search)
       { $match: matchStage },
 
-      // 2) All attendance rows for this training (for counts)
+      // 1.5) Keep only trainings where THIS user has an ACTIVE membership in the course
+      {
+        $lookup: {
+          from: "coursememberships", // <— ensure collection name matches your model
+          let: { cid: "$course", uid: userId },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$course", "$$cid"] },
+                    { $eq: ["$user", "$$uid"] },
+                    { $eq: ["$status", "active"] },
+                  ],
+                },
+              },
+            },
+            { $project: { _id: 1 } },
+          ],
+          as: "myMembership",
+        },
+      },
+      { $match: { $expr: { $gt: [{ $size: "$myMembership" }, 0] } } },
+
+      // 2) All attendance rows (for counts)
       {
         $lookup: {
           from: "trainingattendances",
@@ -357,7 +406,7 @@ export async function fetchTrainingsForUser(userEmail: string, q?: string) {
         },
       },
 
-      // 3) THIS USER'S attendance row (for myAttendance)
+      // 3) This user's attendance (for myAttendance)
       {
         $lookup: {
           from: "trainingattendances",
@@ -379,7 +428,7 @@ export async function fetchTrainingsForUser(userEmail: string, q?: string) {
         },
       },
 
-      // 4) Trainer info
+      // 4) Trainer
       {
         $lookup: {
           from: "users",
@@ -390,7 +439,7 @@ export async function fetchTrainingsForUser(userEmail: string, q?: string) {
       },
       { $unwind: "$trainerDoc" },
 
-      // 5) Course info (for fallback image/category)
+      // 5) Course (for title/image fallback)
       {
         $lookup: {
           from: "courses",
@@ -431,37 +480,30 @@ export async function fetchTrainingsForUser(userEmail: string, q?: string) {
               },
             },
           },
-
-          // myAttendance: first row or "pending"
           myAttendance: {
             $ifNull: [{ $arrayElemAt: ["$myAtt.isAttending", 0] }, "pending"],
           },
-
           effectiveImageUrl: { $ifNull: ["$imageUrl", "$courseDoc.imageUrl"] },
         },
       },
 
-      // 7) Sort by real time
+      // 7) Sort
       { $sort: { startsAt: 1 } },
 
-      // 8) Final shape + formatted strings
+      // 8) Final shape
       {
         $project: {
           _id: 0,
           id: { $toString: "$_id" },
           title: 1,
           location: 1,
-
-          // formatted
           date: { $dateToString: { date: "$startsAt", format: "%Y-%m-%d" } },
           startTime: { $dateToString: { date: "$startsAt", format: "%H:%M" } },
           endTime: { $dateToString: { date: "$endsAt", format: "%H:%M" } },
-
           attending: 1,
           declined: 1,
           unconfirmed: 1,
           myAttendance: 1,
-
           category: "$courseDoc.title",
           imageUrl: "$effectiveImageUrl",
           trainer: {

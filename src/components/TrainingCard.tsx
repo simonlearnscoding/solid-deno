@@ -53,8 +53,6 @@ export default function TrainingCard({ training }: { training: Training }) {
     });
     setPending(null);
   };
-  console.log("TrainingCard rendered for", training.id);
-  console.log(training);
   return (
     <div class="card card-sm bg-base-100 card-border rounded-md shadow-sm hover:bg-base-300 transition-colors w-full">
       <div class="card-body">

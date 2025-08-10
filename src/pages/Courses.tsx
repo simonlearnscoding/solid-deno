@@ -1,18 +1,11 @@
 import { createSignal, For, Suspense } from "solid-js";
 import useQueryCourses from "../hooks/queries/useQueryCourses.ts";
-import { Courses } from "../data/courses.ts";
 
 import CourseCard from "../components/CourseCard.tsx";
-export default function Profile() {
-  const q = useQueryCourses(); // Uncomment this if you want to fetch from API
-  const [query, setQuery] = createSignal("");
 
-  const filteredCourses = () =>
-    Courses.filter(
-      (course) =>
-        course.name.toLowerCase().includes(query().toLowerCase()) ||
-        course.description.toLowerCase().includes(query().toLowerCase()),
-    );
+export default function Courses() {
+  const q = useQueryCourses();
+  const [query, setQuery] = createSignal("");
 
   return (
     <main class="flex flex-col h-dvh max-h-dvh items-center">
@@ -32,9 +25,11 @@ export default function Profile() {
             <div class="skeleton w-full h-48 bg-gray-200 rounded-lg"></div>
           ))}
         >
-          <For each={q.data || filteredCourses()}>
-            {(course) => <CourseCard course={course} />}
-          </For>
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <For each={q.data}>
+              {(course) => <CourseCard variant="search" course={course} />}
+            </For>
+          </div>
         </Suspense>
       </div>
     </main>

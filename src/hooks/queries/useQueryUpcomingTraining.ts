@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/solid-query";
 import type { Training } from "./../../../types/index.ts"; // adjust path as needed
 
 const fetchUpcomingTrainings = async (search: string): Promise<Training[]> => {
-  console.log("Fetching upcoming trainings with search:", search);
   const params = new URLSearchParams();
   if (search) params.append("q", search);
 
