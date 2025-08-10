@@ -2,7 +2,6 @@ import { Hono } from "@hono/hono";
 import { Context } from "jsr:@hono/hono";
 import { HTTPException } from "hono/http-exception";
 import { Types } from "mongoose";
-import { verifyToken } from "../services/auth.ts";
 
 import { HonoVars } from "./../../types/index.ts";
 import {
@@ -24,13 +23,15 @@ courses.get("/", async (c: Context) => {
 });
 
 courses.post("/:id/enrollment", async (c: Context) => {
+  // "left"| "banned"
+  const { action } = await c.req.json();
   const email = c.var.email as string;
   const courseId = c.req.param("id");
   if (!courseId || !Types.ObjectId.isValid(courseId)) {
     throw new HTTPException(400, { message: "Invalid course id" });
   }
 
-  const result = await updateEnrollment(courseId, email, "active");
+  const result = await updateEnrollment(courseId, email, action);
   return c.json(result, 200);
 });
 

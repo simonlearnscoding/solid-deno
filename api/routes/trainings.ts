@@ -25,7 +25,6 @@ trainings.put("/:id", async (c: Context) => {
     throw new HTTPException(400, { message: "Invalid training ID" });
   }
 
-  // Optional explicit state; otherwise toggle
   const body = await jsonOrUndefined<{ isAttending?: Target }>(c.req.raw);
   const target =
     body?.isAttending === "present" || body?.isAttending === "absent"

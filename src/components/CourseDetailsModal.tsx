@@ -1,6 +1,9 @@
 import { useNavigate, useParams } from "@solidjs/router";
 import { For, Show, createMemo, createEffect } from "solid-js";
 import useQueryCourseDetail from "./../hooks/queries/useQueryCourseDetails.ts";
+import { createSignal } from "solid-js";
+
+import useMutateCourseMembership from "../hooks/mutations/useMutateCourseMembership.ts";
 
 export default function CourseModal() {
   const params = useParams();
@@ -8,6 +11,23 @@ export default function CourseModal() {
   const closeModal = () => navigate(-1);
 
   const q = useQueryCourseDetail(params.id);
+
+  const [pending, setPending] = createSignal<boolean>(false);
+  const mutation = useMutateCourseMembership();
+
+  const handleAttendance = async (status: "active" | "left") => {
+    setPending(true);
+    try {
+      await mutation.mutateAsync({
+        action: status,
+        trainingId: params.id,
+      });
+    } catch (error) {
+      console.error("Failed to update attendance:", error);
+    } finally {
+      setPending(false);
+    }
+  };
 
   return (
     <div class="modal modal-open" role="dialog">
@@ -141,7 +161,23 @@ export default function CourseModal() {
                     </div>
                   </div>
                   <div class="flex  flex-1 mt-auto justify-end items-end">
-                    <div class=" btn btn-primary ">Enroll Now</div>
+                    {course().isJoined ? (
+                      <button
+                        onClick={() => handleAttendance("left")}
+                        class=" btn  btn-error "
+                        disabled={pending()}
+                      >
+                        Leave Course
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleAttendance("active")}
+                        class=" btn btn-primary "
+                        disabled={pending()}
+                      >
+                        Enroll Now
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
