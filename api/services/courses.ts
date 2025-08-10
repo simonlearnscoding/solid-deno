@@ -7,11 +7,18 @@ export async function fetchCourses() {
   const docs = await Course.find({})
     .select("_id title description imageUrl tags") // keep payload light
     .sort({ createdAt: -1 })
-    .lean();
+    .populate("trainer", "_id name avatarUrl");
 
   // normalize id to string
+  // TODO: replace with real trainer info qualifiedName
   return docs.map((c: any) => ({
     id: String(c._id),
+    trainer: {
+      id: String(c.trainer?._id),
+      name: c.trainer?.name ?? "",
+      avatarUrl: c.trainer?.avatarUrl ?? null,
+      qualifiedName: c.trainer?.qualifiedName ?? "Certified Coach",
+    },
     title: c.title,
     description: c.description ?? "",
     imageUrl: c.imageUrl ?? null,

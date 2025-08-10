@@ -9,6 +9,12 @@ export interface Course {
   description?: string;
   imageUrl?: string | null;
   tags?: string[];
+  trainer: {
+    id: string;
+    name: string;
+    avatarUrl?: string | null;
+    qualifiedName?: string; // e.g., "Certified Coach"
+  };
 }
 export type Training = {
   id: string;
