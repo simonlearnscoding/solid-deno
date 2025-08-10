@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.ts";
 import usersRoutes from "./routes/users.ts";
 import apiRoutes from "./routes/api.ts";
 import trainingRoutes from "./routes/trainings.ts";
+import coursesRoutes from "./routes/courses.ts";
 import authMiddleware from "./middlewares/authMiddleware.ts";
 import { serveStatic } from "jsr:@hono/hono/serve-static";
 
@@ -39,6 +40,7 @@ app.route("/auth", authRoutes);
 app.route("/api", apiRoutes);
 app.route("/users", usersRoutes);
 app.route("/trainings", trainingRoutes);
+app.route("/courses", coursesRoutes);
 
 app.get("/auth/test", (c) => {
   return c.json({ message: "Middleware passed hahahaha!" });

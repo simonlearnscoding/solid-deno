@@ -1,8 +1,9 @@
 import { Route, Router } from "@solidjs/router";
 import Index from "./pages/Index.tsx";
 import AppLayout from "./layouts/AppLayout.tsx";
+import CourseDetailsModal from "./components/CourseDetailsModal.tsx";
 import Profile from "./pages/Profile.tsx";
-import Search from "./pages/Search.tsx";
+import Courses from "./pages/Courses.tsx";
 import Login from "./pages/Login.tsx";
 import Register from "./pages/Register.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
@@ -27,7 +28,8 @@ const App = () => {
         <Route path="/" component={AppLayout}>
           <Route path="" component={Index} />
           <Route path="profile" component={Profile} />
-          <Route path="search" component={Search} />
+          <Route path="search" component={Courses} />
+          <Route path="/courses/:id" component={CourseDetailsModal} />
         </Route>
         <Route path="/login" component={Login} />
         <Route path="/signup" component={Register} />

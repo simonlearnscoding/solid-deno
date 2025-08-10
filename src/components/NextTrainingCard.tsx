@@ -17,9 +17,6 @@ function formatShortDate(dateStr: string) {
 
 export default function NextTrainingCard() {
   const query = useQueryNextTraining();
-  createEffect(() => {
-    console.log(query.data);
-  });
   const [pending, setPending] = createSignal<"present" | "absent" | null>(null);
   const mutation = useMutateUpdateTrainingAttendance();
 

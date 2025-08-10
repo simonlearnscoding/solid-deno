@@ -4,7 +4,7 @@ import { Context } from "jsr:@hono/hono";
 
 import User from "./../models/User.ts";
 
-import { setCookie, deleteCookie, getCookie } from "jsr:@hono/hono/cookie";
+import { getCookie } from "jsr:@hono/hono/cookie";
 
 import { verifyToken } from "../services/auth.ts";
 
