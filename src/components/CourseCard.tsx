@@ -14,11 +14,9 @@ type Props = {
 export default function CourseCard(props: Props) {
   const c = props.course;
 
-  console.log(c);
   const variant: Variant = props.variant ?? "search";
   const onFilter = props.onFilter ?? (() => {});
 
-  console.log(c);
   if (variant === "sidebar") {
     // Compact but still prominent: thumb, title, trainer, and small "View" button
     return (
