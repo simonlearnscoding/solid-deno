@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import Course from "../models/Course.ts"; // see model below
 import User from "../models/User.ts";
-
+import CourseMembership from "../models/CourseMembership.ts";
 export async function fetchCourses() {
   // Sort by most recently created; change to title if you prefer
   const docs = await Course.find({})
@@ -17,6 +17,34 @@ export async function fetchCourses() {
     imageUrl: c.imageUrl ?? null,
     tags: c.tags ?? [],
   }));
+}
+
+export async function updateEnrollment(
+  courseId: string,
+  userMail: string,
+  action: "active" | "left",
+) {
+  const userDoc = await User.findOne({
+    email: userMail,
+  }).select("_id");
+  if (!userDoc?._id) {
+    throw new Error(`User with email ${userMail} not found`);
+  }
+  const courseEnrollment = await CourseMembership.updateOne(
+    { course: courseId, user: userDoc._id },
+    {
+      $set: {
+        status: action,
+        leftAt: action === "left" ? new Date() : null,
+        joinedAt: action === "active" ? new Date() : null,
+      },
+    },
+    { upsert: true, new: true },
+  ).lean();
+  if (!courseEnrollment) {
+    throw new Error(`Failed to update enrollment for course ${courseId}`);
+  }
+  return courseEnrollment;
 }
 
 export async function getCourseDetail(courseId: string, userMail: string) {

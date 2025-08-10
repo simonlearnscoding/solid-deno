@@ -1,3 +1,8 @@
+//
+//TODO: I should consider storing the user id in the token
+export type HonoVars = {
+  email?: string;
+};
 export interface Course {
   id: string;
   title: string;
