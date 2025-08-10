@@ -18,6 +18,7 @@ export interface Course {
 }
 export type Training = {
   id: string;
+  myAttendance: "present" | "absent" | "pending";
   title: string;
   trainer: {
     name: string;

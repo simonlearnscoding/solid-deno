@@ -7,7 +7,7 @@ import Courses from "./pages/Courses.tsx";
 import Login from "./pages/Login.tsx";
 import Register from "./pages/Register.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
-import { onMount } from "solid-js";
+import { onMount, Suspense } from "solid-js";
 import { useAuthStore } from "./stores/authStore.ts";
 import "./App.css";
 

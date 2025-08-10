@@ -24,6 +24,27 @@ export default function TrainingCard({ training }: { training: Training }) {
   const [pending, setPending] = createSignal<"present" | "absent" | null>(null);
   const mutation = useMutateUpdateTrainingAttendance();
 
+  //NOTE: duplicated in next training card
+  const presentBtnClassMap: Record<
+    "present" | "absent" | "pending" | "",
+    string
+  > = {
+    present: "btn-success",
+    absent: "",
+    pending: "btn-outline btn-success",
+    "": "",
+  };
+
+  //NOTE: duplicated in next training card
+  const absentBtnClassMap: Record<
+    "present" | "absent" | "pending" | "",
+    string
+  > = {
+    present: "",
+    absent: "btn-error",
+    pending: "btn-outline btn-error",
+    "": "",
+  };
   const handleAttendance = async (status: "present" | "absent") => {
     setPending(status);
     await mutation.mutate({
@@ -32,6 +53,8 @@ export default function TrainingCard({ training }: { training: Training }) {
     });
     setPending(null);
   };
+  console.log("TrainingCard rendered for", training.id);
+  console.log(training);
   return (
     <div class="card card-sm bg-base-100 card-border rounded-md shadow-sm hover:bg-base-300 transition-colors w-full">
       <div class="card-body">
@@ -112,7 +135,7 @@ export default function TrainingCard({ training }: { training: Training }) {
           <button
             onClick={async () => await handleAttendance("present")}
             disabled={mutation.isPending}
-            class={`btn flex-1 ${pending() === "present" && mutation.isPending ? "loading" : ""}`}
+            class={`btn ${presentBtnClassMap[training.myAttendance]} flex-1   ${pending() === "present" && mutation.isPending ? "loading" : ""}`}
           >
             {pending() === "present" && mutation.isPending
               ? "Saving..."
@@ -122,7 +145,7 @@ export default function TrainingCard({ training }: { training: Training }) {
           <button
             onClick={async () => await handleAttendance("absent")}
             disabled={mutation.isPending}
-            class={`btn btn-ghost flex-1 ${pending() === "absent" && mutation.isPending ? "loading" : ""}`}
+            class={`btn  flex-1 ${absentBtnClassMap[training.myAttendance]}  ${pending() === "absent" && mutation.isPending ? "loading" : ""}`}
           >
             {pending() === "absent" && mutation.isPending
               ? "Saving..."

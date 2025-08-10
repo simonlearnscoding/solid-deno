@@ -28,6 +28,26 @@ export default function NextTrainingCard() {
     });
     setPending(null);
   };
+
+  //NOTE: duplicated in next training card
+  const presentBtnClassMap: Record<
+    "present" | "absent" | "pending" | "",
+    string
+  > = {
+    present: "btn-success",
+    absent: "",
+    pending: "btn-outline btn-success",
+    "": "",
+  };
+  const absentBtnClassMap: Record<
+    "present" | "absent" | "pending" | "",
+    string
+  > = {
+    present: "",
+    absent: "btn-error",
+    pending: "btn-outline btn-error",
+    "": "",
+  };
   return (
     <div class="card bg-base-100 rounded-md shadow-sm">
       <div class="card-body">
@@ -65,7 +85,7 @@ export default function NextTrainingCard() {
                     await handleAttendance(training().id, "present")
                   }
                   disabled={mutation.isPending}
-                  class={`btn flex-1 ${pending() === "present" && mutation.isPending ? "loading" : ""}`}
+                  class={`btn flex-1 ${presentBtnClassMap[training().myAttendance]} ${pending() === "present" && mutation.isPending ? "loading" : ""}`}
                 >
                   {pending() === "present" && mutation.isPending
                     ? "Saving..."
@@ -77,7 +97,7 @@ export default function NextTrainingCard() {
                     await handleAttendance(training().id, "absent")
                   }
                   disabled={mutation.isPending}
-                  class={`btn btn-ghost flex-1 ${pending() === "absent" && mutation.isPending ? "loading" : ""}`}
+                  class={`btn flex-1 ${absentBtnClassMap[training().myAttendance]} ${pending() === "absent" && mutation.isPending ? "loading" : ""}`}
                 >
                   {pending() === "absent" && mutation.isPending
                     ? "Saving..."

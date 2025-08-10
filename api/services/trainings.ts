@@ -193,16 +193,17 @@ export async function fetchNextTrainingForUser(userEmail: string) {
 
   const userDoc = await User.findOne({ email: userEmail }).select("_id");
   if (!userDoc) throw new Error(`User with email ${userEmail} not found`);
+  const userId = userDoc._id;
 
   const [next] = await Training.aggregate([
-    // 1) future trainings only
+    // 1) Only future trainings
     { $match: { startsAt: { $gte: now } } },
 
-    // 2) this user's attendance for each training (left join)
+    // 2) This user's attendance (left join)
     {
       $lookup: {
         from: "trainingattendances",
-        let: { tid: "$_id", uid: userDoc._id },
+        let: { tid: "$_id", uid: userId },
         pipeline: [
           {
             $match: {
@@ -216,21 +217,22 @@ export async function fetchNextTrainingForUser(userEmail: string) {
           },
           { $project: { _id: 0, isAttending: 1 } },
         ],
-        as: "mine",
+        as: "myAtt",
       },
     },
-    // derive myStatus = first(mine.isAttending) or "pending"
+    // derive myAttendance = first(myAtt.isAttending) or "pending"
     {
       $addFields: {
-        myStatus: {
-          $ifNull: [{ $first: "$mine.isAttending" }, "pending"],
+        myAttendance: {
+          $ifNull: [{ $arrayElemAt: ["$myAtt.isAttending", 0] }, "pending"],
         },
       },
     },
-    // 3) exclude if I'm absent
-    { $match: { myStatus: { $ne: "absent" } } },
 
-    // 4) trainer & course lookups (for display)
+    // 3) Exclude if I'm absent
+    { $match: { myAttendance: { $ne: "absent" } } },
+
+    // 4) Trainer & Course (for display, category, image fallback)
     {
       $lookup: {
         from: "users",
@@ -250,7 +252,7 @@ export async function fetchNextTrainingForUser(userEmail: string) {
     },
     { $unwind: "$courseDoc" },
 
-    // 5) (optional) counts for badges
+    // 5) All attendance rows for counts
     {
       $lookup: {
         from: "trainingattendances",
@@ -259,6 +261,8 @@ export async function fetchNextTrainingForUser(userEmail: string) {
         as: "attAll",
       },
     },
+
+    // 6) Derived fields (counts, formatting, image fallback)
     {
       $addFields: {
         attending: {
@@ -288,44 +292,37 @@ export async function fetchNextTrainingForUser(userEmail: string) {
             },
           },
         },
-        // Add formatted date/time fields
         date: { $dateToString: { date: "$startsAt", format: "%Y-%m-%d" } },
         startTime: { $dateToString: { date: "$startsAt", format: "%H:%M" } },
         endTime: { $dateToString: { date: "$endsAt", format: "%H:%M" } },
-        // Use course image as fallback
         effectiveImageUrl: { $ifNull: ["$imageUrl", "$courseDoc.imageUrl"] },
       },
     },
 
-    // 6) shape + sort/limit
+    // 7) Final shape
     {
       $project: {
         _id: 0,
         id: { $toString: "$_id" },
         title: 1,
-        description: 1,
         location: 1,
-        startsAt: 1,
-        endsAt: 1,
         date: 1,
         startTime: 1,
         endTime: 1,
-        myStatus: 1,
         attending: 1,
         declined: 1,
         unconfirmed: 1,
+        myAttendance: 1,
+        category: "$courseDoc.title",
+        imageUrl: "$effectiveImageUrl",
         trainer: {
           name: "$trainerDoc.name",
           avatarUrl: "$trainerDoc.avatarUrl",
         },
-        course: {
-          id: { $toString: "$courseDoc._id" },
-          title: "$courseDoc.title",
-          imageUrl: "$courseDoc.imageUrl",
-        },
-        imageUrl: "$effectiveImageUrl",
       },
     },
+
+    // 8) Soonest upcoming
     { $sort: { startsAt: 1 } },
     { $limit: 1 },
   ]);
@@ -338,21 +335,19 @@ export async function fetchTrainingsForUser(userEmail: string, q?: string) {
 
     const userDoc = await User.findOne({ email: userEmail }).select("_id");
     if (!userDoc) throw new Error(`User with email ${userEmail} not found`);
+    const userId = userDoc._id;
 
-    const matchStage: any = {
-      startsAt: { $gte: now },
-    };
-
+    const matchStage: any = { startsAt: { $gte: now } };
     if (q && q.trim()) {
       const regex = new RegExp(q.trim(), "i");
       matchStage.$or = [{ title: regex }, { location: regex }];
     }
 
     const trainings = await Training.aggregate([
-      // 1) Filter by upcoming + search query
+      // 1) Filter: upcoming + optional search
       { $match: matchStage },
 
-      // 2) Attendance counts
+      // 2) All attendance rows for this training (for counts)
       {
         $lookup: {
           from: "trainingattendances",
@@ -362,7 +357,29 @@ export async function fetchTrainingsForUser(userEmail: string, q?: string) {
         },
       },
 
-      // 3) Trainer info
+      // 3) THIS USER'S attendance row (for myAttendance)
+      {
+        $lookup: {
+          from: "trainingattendances",
+          let: { trainingId: "$_id", userId: userId },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$training", "$$trainingId"] },
+                    { $eq: ["$user", "$$userId"] },
+                  ],
+                },
+              },
+            },
+            { $project: { _id: 0, isAttending: 1 } },
+          ],
+          as: "myAtt",
+        },
+      },
+
+      // 4) Trainer info
       {
         $lookup: {
           from: "users",
@@ -373,7 +390,7 @@ export async function fetchTrainingsForUser(userEmail: string, q?: string) {
       },
       { $unwind: "$trainerDoc" },
 
-      // 4) Course info
+      // 5) Course info (for fallback image/category)
       {
         $lookup: {
           from: "courses",
@@ -384,7 +401,7 @@ export async function fetchTrainingsForUser(userEmail: string, q?: string) {
       },
       { $unwind: "$courseDoc" },
 
-      // 5) Counts + formatting
+      // 6) Derived fields
       {
         $addFields: {
           attending: {
@@ -414,26 +431,37 @@ export async function fetchTrainingsForUser(userEmail: string, q?: string) {
               },
             },
           },
+
+          // myAttendance: first row or "pending"
+          myAttendance: {
+            $ifNull: [{ $arrayElemAt: ["$myAtt.isAttending", 0] }, "pending"],
+          },
+
           effectiveImageUrl: { $ifNull: ["$imageUrl", "$courseDoc.imageUrl"] },
-          date: { $dateToString: { date: "$startsAt", format: "%Y-%m-%d" } },
-          startTime: { $dateToString: { date: "$startsAt", format: "%H:%M" } },
-          endTime: { $dateToString: { date: "$endsAt", format: "%H:%M" } },
         },
       },
 
-      // 6) Final shape
+      // 7) Sort by real time
+      { $sort: { startsAt: 1 } },
+
+      // 8) Final shape + formatted strings
       {
         $project: {
           _id: 0,
           id: { $toString: "$_id" },
           title: 1,
           location: 1,
-          date: 1,
-          startTime: 1,
-          endTime: 1,
+
+          // formatted
+          date: { $dateToString: { date: "$startsAt", format: "%Y-%m-%d" } },
+          startTime: { $dateToString: { date: "$startsAt", format: "%H:%M" } },
+          endTime: { $dateToString: { date: "$endsAt", format: "%H:%M" } },
+
           attending: 1,
           declined: 1,
           unconfirmed: 1,
+          myAttendance: 1,
+
           category: "$courseDoc.title",
           imageUrl: "$effectiveImageUrl",
           trainer: {
@@ -442,9 +470,6 @@ export async function fetchTrainingsForUser(userEmail: string, q?: string) {
           },
         },
       },
-
-      // 7) Sort
-      { $sort: { date: 1, startTime: 1 } },
     ]);
 
     return trainings;
