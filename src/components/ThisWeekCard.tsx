@@ -1,14 +1,13 @@
 // components/ThisWeekCard.tsx
 import { For, Show, Suspense } from "solid-js";
 import useQueryThisWeekConfirmed from "../hooks/queries/useQueryThisWeekConfirmedTraining.ts";
-import type { Training } from "../../types";
 
 function weekdayLabel(dateIso: string) {
   return new Date(dateIso).toLocaleDateString(undefined, { weekday: "short" });
 }
 
 export default function ThisWeekCard() {
-  const q = useQueryThisWeekConfirmed(); // data(): Training[]
+  const q = useQueryThisWeekConfirmed();
 
   return (
     <div class="card bg-base-100 shadow-sm rounded-md">

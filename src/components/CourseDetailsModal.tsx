@@ -9,12 +9,6 @@ export default function CourseModal() {
 
   const q = useQueryCourseDetail(params.id);
 
-  createEffect(() => {
-    console.log("Loading:", q.isLoading);
-    console.log("Error:", q.isError, q.error?.message);
-    console.log("Data:", q.data);
-  });
-
   return (
     <div class="modal modal-open" role="dialog">
       <div class="modal-box relative w-11/12 max-w-4xl p-0 overflow-hidden">
@@ -47,6 +41,7 @@ export default function CourseModal() {
         <Show when={q.data}>
           {(course) => (
             <>
+              {console.log("Course data:", course())}
               {/* Cover */}
               <div class="relative h-44 md:h-56 bg-base-200">
                 <img
@@ -135,7 +130,7 @@ export default function CourseModal() {
                 </div>
 
                 {/* Right */}
-                <div class="md:col-span-1">
+                <div class="md:col-span-1 flex flex-col justify-between">
                   <div class="rounded-xl border border-base-200 bg-base-100 p-4 sticky top-4">
                     <div class="font-semibold mb-2">Students</div>
                     <div class="text-3xl font-bold">
@@ -144,6 +139,9 @@ export default function CourseModal() {
                         enrolled
                       </span>
                     </div>
+                  </div>
+                  <div class="flex  flex-1 mt-auto justify-end items-end">
+                    <div class=" btn btn-primary ">Enroll Now</div>
                   </div>
                 </div>
               </div>
