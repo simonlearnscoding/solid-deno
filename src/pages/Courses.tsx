@@ -1,9 +1,10 @@
-import { createSignal, For, Suspense, Show } from "solid-js";
 import CourseCard from "../components/CourseCard.tsx";
 
 import CityPicker from "../components/CityPicker.tsx";
 import { type City } from "../data/cities.ts";
 import useQueryCoursesNearby from "../hooks/queries/useQueryCoursesNearby.ts";
+
+import { createSignal, For, Suspense, Show, createMemo } from "solid-js";
 
 export default function Courses() {
   const [city, setCity] = createSignal<City | null>(null);
@@ -13,9 +14,38 @@ export default function Courses() {
   });
   const [query, setQuery] = createSignal("");
 
+  // --- filtering helpers ---
+  const norm = (s: string) =>
+    s
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "");
+
+  const filtered = createMemo(() => {
+    const data = q.data ?? [];
+    const qv = norm(query().trim());
+    if (!qv) return data;
+
+    return data.filter((c: any) => {
+      const hay = [
+        c.title ?? c.name,
+        c.description,
+        c.city,
+        c.location?.name,
+        c.provider?.name,
+        ...(Array.isArray(c.tags) ? c.tags : []),
+      ]
+        .filter(Boolean)
+        .map((s: string) => norm(String(s)))
+        .join(" ");
+
+      return hay.includes(qv);
+    });
+  });
+  // -------------------------
+
   return (
     <main class="h-dvh max-h-dvh flex flex-col">
-      {/* Top bar */}
       <header class="px-4 lg:px-6 py-4 flex items-center justify-between">
         <h1 class="text-xl lg:text-2xl font-semibold">
           Find your dream course today
@@ -24,7 +54,7 @@ export default function Courses() {
           <CityPicker
             onPick={(c) => {
               setCity(c);
-              setQuery(""); // reset search query when changing city
+              setQuery(""); // reset search on city change
             }}
             selected={city() || null}
           />
@@ -51,9 +81,7 @@ export default function Courses() {
         />
       </div>
 
-      {/* Split layout at lg: list + map */}
       <div class="flex-1 min-h-0 lg:grid lg:grid-cols-[1fr_minmax(420px,42vw)] lg:gap-4 lg:px-6 lg:pb-4">
-        {/* LEFT: results list (scrollable) */}
         <section class="min-h-0 overflow-y-auto px-4 lg:px-0">
           <Suspense
             fallback={
@@ -65,12 +93,11 @@ export default function Courses() {
             }
           >
             <Show
-              when={q.data?.length}
+              when={filtered().length}
               fallback={<p class="px-1 py-8 opacity-60">No courses yet.</p>}
             >
-              {/* Mobile: rows (one per line). Desktop: flex-wrap cards */}
               <div class="flex flex-col gap-4 lg:flex-row lg:flex-wrap">
-                <For each={q.data}>
+                <For each={filtered()}>
                   {(course) => (
                     <div class="lg:basis-[calc(33.333%-1rem)] xl:basis-[calc(25%-1rem)] flex-shrink-0">
                       <CourseCard variant="search" course={course} />
@@ -83,13 +110,9 @@ export default function Courses() {
           </Suspense>
         </section>
 
-        {/* RIGHT: sticky map on desktop */}
         <aside class="hidden lg:block">
           <div class="sticky top-4 h-[calc(100dvh-8rem)] rounded-2xl overflow-hidden shadow bg-base-100">
-            {/* Replace this placeholder with your map component */}
-            <div id="map" class="w-full h-full">
-              {/* e.g. <Map center={...} markers={q.data} /> */}
-            </div>
+            <div id="map" class="w-full h-full" />
           </div>
         </aside>
       </div>
