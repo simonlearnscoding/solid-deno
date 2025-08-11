@@ -3,9 +3,13 @@ import { Context } from "jsr:@hono/hono";
 import { HTTPException } from "hono/http-exception";
 import { Types } from "mongoose";
 
+import { toNumber } from "./../utils/geo.ts";
+
 import { HonoVars } from "./../../types/index.ts";
 import {
   fetchCourses,
+  fetchCoursesNearbyFlat,
+  fetchCoursesNearbyGeoJSON,
   getCourseDetail,
   updateEnrollment,
 } from "../services/courses.ts";
@@ -20,6 +24,35 @@ courses.get("/", async (c: Context) => {
     console.error("GET /courses failed:", err);
     return c.json({ error: "Internal server error" }, 500);
   }
+});
+
+courses.get("/near", async (c) => {
+  const q = c.req.query();
+  const lng = toNumber(q.lng);
+  const lat = toNumber(q.lat);
+  const max = toNumber(q.max) ?? 10000;
+  const limit = Math.min(toNumber(q.limit) ?? 200, 500);
+  const format = (q.format ?? "flat").toLowerCase();
+
+  if (
+    lng === undefined ||
+    lat === undefined ||
+    lng < -180 ||
+    lng > 180 ||
+    lat < -90 ||
+    lat > 90
+  ) {
+    throw new HTTPException(400, {
+      message: "lng and lat are required numbers",
+    });
+  }
+
+  const result =
+    format === "geojson"
+      ? await fetchCoursesNearbyGeoJSON({ lng, lat, max, limit })
+      : await fetchCoursesNearbyFlat({ lng, lat, max, limit });
+
+  return c.json(result, 200);
 });
 
 courses.post("/:id/enrollment", async (c: Context) => {

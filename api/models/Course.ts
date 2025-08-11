@@ -7,6 +7,16 @@ const CourseSchema: Schema = new Schema(
     title: { type: String, required: true },
     description: { type: String },
     imageUrl: { type: String },
+
+    address: String, // "123 Main St, City"
+    city: String,
+    country: String,
+
+    // GeoJSON (WGS84)
+    location: {
+      type: { type: String, enum: ["Point"], default: "Point", required: true },
+      coordinates: { type: [Number], required: true }, // [lng, lat]
+    },
   },
   { timestamps: { createdAt: true, updatedAt: true } },
 );

@@ -1,10 +1,117 @@
 import Course from "../models/Course.ts"; // see model below
 import User from "../models/User.ts";
 import CourseMembership from "../models/CourseMembership.ts";
+import { toFeatureCollection } from "./../utils/geo.ts";
 
 import { Types } from "mongoose";
 
 type LeanId = { _id: Types.ObjectId };
+
+// in services/courses.ts
+type NearInput = {
+  lng: number;
+  lat: number;
+  max?: number;
+  q?: string;
+  limit?: number;
+};
+
+type InBoundsInput = {
+  swLng: number;
+  swLat: number;
+  neLng: number;
+  neLat: number;
+  limit?: number;
+};
+
+export async function fetchCoursesInBounds(input: InBoundsInput) {
+  const { swLng, swLat, neLng, neLat, limit = 300 } = input;
+
+  return Course.find({
+    location: {
+      $geoWithin: {
+        $box: [
+          [swLng, swLat], // SW corner
+          [neLng, neLat], // NE corner
+        ],
+      },
+    },
+  })
+    .select("_id title imageUrl city location")
+    .limit(Math.min(limit, 500))
+    .lean()
+    .then((docs) =>
+      docs.map((d: any) => ({
+        _id: d._id,
+        title: d.title,
+        imageUrl: d.imageUrl,
+        city: d.city,
+        location: d.location, // { type: "Point", coordinates: [lng, lat] }
+      })),
+    );
+}
+export async function fetchCoursesNearby(input: NearInput) {
+  const { lng, lat, max = 10000, q, limit = 200 } = input;
+
+  const pipeline: any[] = [
+    {
+      $geoNear: {
+        near: { type: "Point", coordinates: [lng, lat] },
+        key: "location",
+        spherical: true,
+        distanceField: "distance",
+        maxDistance: max,
+        query: q
+          ? {
+              $or: [
+                { title: new RegExp(q, "i") },
+                { city: new RegExp(q, "i") },
+              ],
+            }
+          : {},
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        title: 1,
+        imageUrl: 1,
+        city: 1,
+        location: 1,
+        distance: 1,
+      },
+    },
+    { $limit: Math.min(limit, 500) },
+  ];
+
+  return Course.aggregate(pipeline);
+}
+
+// services/courses.ts
+export async function fetchCoursesNearbyFlat(input: NearInput) {
+  const docs = await fetchCoursesNearby(input);
+  return docs.map((d) => ({
+    id: String(d._id),
+    title: d.title,
+    description: "",
+    imageUrl: d.imageUrl,
+    city: d.city,
+    distanceMeters: d.distance,
+  }));
+}
+
+export async function fetchCoursesNearbyGeoJSON(input: NearInput) {
+  const docs = await fetchCoursesNearby(input);
+  return toFeatureCollection(
+    docs.map((d) => ({
+      _id: d._id,
+      title: d.title,
+      city: d.city,
+      location: d.location,
+      distance: d.distance,
+    })),
+  );
+}
 
 export async function getMyCourses(userMail: string) {
   // 1) Get user id

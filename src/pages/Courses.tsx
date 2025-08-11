@@ -1,9 +1,16 @@
 import { createSignal, For, Suspense, Show } from "solid-js";
-import useQueryCourses from "../hooks/queries/useQueryCourses.ts";
 import CourseCard from "../components/CourseCard.tsx";
 
+import CityPicker from "../components/CityPicker.tsx";
+import { type City } from "../data/cities.ts";
+import useQueryCoursesNearby from "../hooks/queries/useQueryCoursesNearby.ts";
+
 export default function Courses() {
-  const q = useQueryCourses();
+  const [city, setCity] = createSignal<City | null>(null);
+  const q = useQueryCoursesNearby(city, {
+    format: "flat",
+    max: city()?.radiusKm ? city()!.radiusKm! * 1000 : 15000,
+  });
   const [query, setQuery] = createSignal("");
 
   return (
@@ -13,14 +20,23 @@ export default function Courses() {
         <h1 class="text-xl lg:text-2xl font-semibold">
           Find your dream course today
         </h1>
-        <div class="hidden lg:block w-80">
-          <input
-            type="text"
-            placeholder="Search..."
-            value={query()}
-            onInput={(e) => setQuery(e.currentTarget.value)}
-            class="input input-bordered w-full"
+        <div class="flex items-center gap-2 lg:gap-4">
+          <CityPicker
+            onPick={(c) => {
+              setCity(c);
+              setQuery(""); // reset search query when changing city
+            }}
+            selected={city() || null}
           />
+          <div class="hidden lg:block w-80">
+            <input
+              type="text"
+              placeholder="Search..."
+              value={query()}
+              onInput={(e) => setQuery(e.currentTarget.value)}
+              class="input input-bordered w-full"
+            />
+          </div>
         </div>
       </header>
 

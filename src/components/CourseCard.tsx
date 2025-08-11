@@ -37,7 +37,7 @@ export default function CourseCard(props: Props) {
           onClick={() => onFilter(c.id)}
           aria-label={`Filter by ${c.title}`}
         >
-          <div class="truncate font-medium">{c.title}</div>
+          <div class="truncate font-medium ">{c.title}</div>
           {c.trainer?.name && (
             <div class="text-xs opacity-70 truncate">{c.trainer.name}</div>
           )}
@@ -74,7 +74,11 @@ export default function CourseCard(props: Props) {
       <div class="card-body p-4 md:p-5 gap-2">
         {/* Title */}
         <div class="flex items-start justify-between gap-2">
-          <h3 class="card-title text-lg md:text-xl leading-tight">{c.title}</h3>
+        
+        {/* TODO: Truncate the text */}
+          <h3 class="card-title text-ellipsis text-lg mr-4 md:text-xl leading-tight">
+            {c.title}
+          </h3>
 
           {variant === "highlighted" && (
             // "View" navigates to details; stop propagation so card click still filters
