@@ -21,5 +21,8 @@ const CourseSchema: Schema = new Schema(
   { timestamps: { createdAt: true, updatedAt: true } },
 );
 
+// models/Course.ts
+CourseSchema.index({ location: "2dsphere" });
+
 export default mongoose.models.Course ||
   mongoose.model<Course>("Course", CourseSchema);
