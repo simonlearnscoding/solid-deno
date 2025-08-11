@@ -9,6 +9,7 @@ import { HonoVars } from "./../../types/index.ts";
 import {
   fetchCourses,
   fetchCoursesNearbyFlat,
+  fetchCoursesInBounds,
   fetchCoursesNearbyGeoJSON,
   getCourseDetail,
   updateEnrollment,
@@ -24,6 +25,28 @@ courses.get("/", async (c: Context) => {
     console.error("GET /courses failed:", err);
     return c.json({ error: "Internal server error" }, 500);
   }
+});
+
+// routes/courses.ts
+courses.get("/in-bounds", async (c) => {
+  const q = c.req.query();
+  const swLng = Number(q.swLng),
+    swLat = Number(q.swLat);
+  const neLng = Number(q.neLng),
+    neLat = Number(q.neLat);
+  const limit = Math.min(Number(q.limit ?? 300), 500);
+
+  if ([swLng, swLat, neLng, neLat].some((v) => Number.isNaN(v)))
+    throw new HTTPException(400, { message: "Invalid bounds" });
+
+  const list = await fetchCoursesInBounds({
+    swLng,
+    swLat,
+    neLng,
+    neLat,
+    limit,
+  });
+  return c.json(list, 200);
 });
 
 courses.get("/near", async (c) => {
