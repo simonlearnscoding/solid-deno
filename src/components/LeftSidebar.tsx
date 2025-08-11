@@ -58,7 +58,7 @@ export default function LeftSidebar(props: {
           )}
 
           {coursesQuery.data && coursesQuery.data.length > 0 ? (
-            <ul class="menu gap-2 w-full">
+            <ul class=" gap-2 w-full ">
               <For each={coursesQuery.data}>
                 {(course: Course) => (
                   <li>

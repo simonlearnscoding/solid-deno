@@ -21,7 +21,7 @@ export default function CourseCard(props: Props) {
     // Compact but still prominent: thumb, title, trainer, and small "View" button
     return (
       <div
-        class={`w-full flex items-center  gap-3 p-2 rounded-lg transition border
+        class={`flex-grow flex my-2  items-center  gap-3 p-2 rounded-lg transition border
               ${props.selected ? "bg-primary/10 border-primary/40" : "hover:bg-base-200 border-secondary/10"}`}
       >
         {/* Thumbnail */}
@@ -74,8 +74,7 @@ export default function CourseCard(props: Props) {
       <div class="card-body p-4 md:p-5 gap-2">
         {/* Title */}
         <div class="flex items-start justify-between gap-2">
-        
-        {/* TODO: Truncate the text */}
+          {/* TODO: Truncate the text */}
           <h3 class="card-title text-ellipsis text-lg mr-4 md:text-xl leading-tight">
             {c.title}
           </h3>

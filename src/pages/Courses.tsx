@@ -6,7 +6,31 @@ import useQueryCoursesNearby from "../hooks/queries/useQueryCoursesNearby.ts";
 
 import { createSignal, For, Suspense, Show, createMemo } from "solid-js";
 
+import Map from "../components/Map.tsx";
+import useQueryCoursesInBounds, {
+  type Bounds,
+} from "../hooks/queries/useQueryCoursesInBounds.ts";
+
+function bboxFromCenterRadius(
+  center: { lng: number; lat: number },
+  radiusMeters: number,
+): Bounds {
+  const R = 6371000,
+    dLat = (radiusMeters / R) * (180 / Math.PI);
+  const dLng =
+    (radiusMeters / (R * Math.cos((center.lat * Math.PI) / 180))) *
+    (180 / Math.PI);
+  return {
+    swLng: center.lng - dLng,
+    swLat: center.lat - dLat,
+    neLng: center.lng + dLng,
+    neLat: center.lat + dLat,
+  };
+}
+
 export default function Courses() {
+  const [bounds, setBounds] = createSignal<Bounds | undefined>(undefined);
+  const [selectedId, setSelectedId] = createSignal<string | null>(null);
   const [city, setCity] = createSignal<City | null>(null);
   const q = useQueryCoursesNearby(city, {
     format: "flat",
@@ -43,6 +67,24 @@ export default function Courses() {
     });
   });
   // -------------------------
+  //
+  //
+  // fetch markers for current bounds
+  const inBounds = useQueryCoursesInBounds(bounds, query);
+
+  const markers = createMemo(() =>
+    (inBounds.data ?? []).map((c: any) => ({
+      id: String(c._id ?? c.id),
+      title: c.title,
+      lng: c.location.coordinates[0],
+      lat: c.location.coordinates[1],
+    })),
+  );
+
+  const mapCenter = createMemo(() => ({
+    lng: city()?.center.lng ?? 8.95,
+    lat: city()?.center.lat ?? 46.17,
+  }));
 
   return (
     <main class="h-dvh max-h-dvh flex flex-col">
@@ -55,6 +97,9 @@ export default function Courses() {
             onPick={(c) => {
               setCity(c);
               setQuery(""); // reset search on city change
+              setBounds(
+                bboxFromCenterRadius(c.center, (c.radiusKm ?? 10) * 1000),
+              ); // seed bounds
             }}
             selected={city() || null}
           />
@@ -110,11 +155,16 @@ export default function Courses() {
           </Suspense>
         </section>
 
-        <aside class="hidden lg:block">
-          <div class="sticky top-4 h-[calc(100dvh-8rem)] rounded-2xl overflow-hidden shadow bg-base-100">
-            <div id="map" class="w-full h-full" />
-          </div>
-        </aside>
+
+<aside class="block">
+  <div class="sticky top-4 h-[calc(100dvh-8rem)] rounded-2xl overflow-hidden shadow bg-base-100">
+    <Map
+      center={mapCenter}                // accessor
+      zoom={11}                         // number (optional)
+      onBoundsChanged={(b) => setBounds(b)}
+    />
+  </div>
+</aside>
       </div>
     </main>
   );

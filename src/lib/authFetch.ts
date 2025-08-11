@@ -1,46 +1,55 @@
 // src/lib/api/authFetch.ts
+const nativeFetch = globalThis.fetch.bind(globalThis);
+const API_BASE = new URL(
+  import.meta.env.VITE_API_URL ?? "http://localhost:8000",
+);
+
+function isOurApi(urlStr: string) {
+  // Support relative URLs
+  const u = new URL(urlStr, location.origin);
+  return (
+    u.origin === API_BASE.origin &&
+    u.pathname.startsWith(API_BASE.pathname || "")
+  );
+}
+
 export async function authFetch(
   fetchFn: typeof fetch,
-  input: RequestInfo,
+  input: RequestInfo | URL,
   init: RequestInit = {},
 ): Promise<Response> {
-  const url = typeof input === "string" ? input : input.url;
+  const url = typeof input === "string" ? input : (input as Request).url;
 
-  // **Don’t intercept your own login or refresh calls**
+  // ✅ Only intercept your own API
+  if (!isOurApi(url)) {
+    return nativeFetch(input as any, init);
+  }
+
+  // For login/refresh, just include cookies and pass-through
   if (url.endsWith("/login") || url.endsWith("/refresh")) {
-    console.log("Skipping authFetch for login or refresh URL:", url);
-    return fetchFn(input, init);
+    return nativeFetch(input as any, { ...init, credentials: "include" });
   }
 
-  console.log("authFetch called with URL:", url);
-  init.credentials = init.credentials ?? "include";
+  // Add credentials/headers for API calls
+  const nextInit: RequestInit = {
+    ...init,
+    credentials: "include",
+    headers: new Headers(init.headers as any),
+  };
 
-  let res = await fetchFn(input, init);
-  console.log("Initial response status:", res.status);
+  let res = await nativeFetch(input as any, nextInit);
   if (res.status !== 401) return res;
-  console.log("Unauthorized response, attempting to refresh token...");
 
-  if (window.location.pathname === "/login") {
-    return res;
-  }
-  // try refresh…
-  try {
-    console.log("hitting refresh endpoint...");
-    const refreshRes = await fetch("http://localhost:8000/auth/refresh", {
-      method: "POST",
-      credentials: "include",
-    });
-  } catch (error) {
-    console.error("Error during token refresh:", error);
-    // window.location.href = "/login";
-    // throw new Error("Not authenticated");
-  }
+  // try refresh
+  await nativeFetch(new URL("/auth/refresh", API_BASE).toString(), {
+    method: "POST",
+    credentials: "include",
+  });
 
-  console.log("refresh successful, retrying original request...");
-  // retry original…
-  res = await fetchFn(input, init);
+  res = await nativeFetch(input as any, nextInit);
   if (res.status === 401) {
-    window.location.href = "/login";
+    // optional: redirect
+    // window.location.href = "/login";
     throw new Error("Not authenticated");
   }
   return res;
