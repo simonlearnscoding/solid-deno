@@ -17,6 +17,7 @@
     "npm:daisyui@^5.0.49": "5.0.50",
     "npm:fuse@~0.12.1": "0.12.1_@parcel+watcher@2.5.1_graphql@16.11.0_graphql-yoga@5.15.1__graphql@16.11.0_@pothos+core@3.41.2__graphql@16.11.0_dataloader@2.2.3_urql@4.2.2__@urql+core@4.3.0___graphql@16.11.0__react@19.1.1__graphql@16.11.0_@urql+core@4.3.0__graphql@16.11.0_vite@5.4.19_typescript@5.8.3",
     "npm:hono@^4.8.9": "4.8.9",
+    "npm:maplibre-gl@^5.6.2": "5.6.2",
     "npm:mongoose@^8.16.5": "8.16.5",
     "npm:solid-icons@*": "1.1.0_solid-js@1.9.7__seroval@1.3.2",
     "npm:solid-icons@^1.1.0": "1.1.0_solid-js@1.9.7__seroval@1.3.2",
@@ -1130,6 +1131,60 @@
         "@jridgewell/sourcemap-codec"
       ]
     },
+    "@mapbox/geojson-rewind@0.5.2": {
+      "integrity": "sha512-tJaT+RbYGJYStt7wI3cq4Nl4SXxG8W7JDG5DMJu97V25RnbNg3QtQtf+KD+VLjNpWKYsRvXDNmNrBgEETr1ifA==",
+      "dependencies": [
+        "get-stream",
+        "minimist"
+      ]
+    },
+    "@mapbox/jsonlint-lines-primitives@2.0.2": {
+      "integrity": "sha512-rY0o9A5ECsTQRVhv7tL/OyDpGAoUB4tTvLiW1DSzQGq4bvTPhNw1VpSNjDJc5GFZ2XuyOtSWSVN05qOtcD71qQ=="
+    },
+    "@mapbox/point-geometry@1.1.0": {
+      "integrity": "sha512-YGcBz1cg4ATXDCM/71L9xveh4dynfGmcLDqufR+nQQy3fKwsAZsWd/x4621/6uJaeB9mwOHE6hPeDgXz9uViUQ=="
+    },
+    "@mapbox/tiny-sdf@2.0.7": {
+      "integrity": "sha512-25gQLQMcpivjOSA40g3gO6qgiFPDpWRoMfd+G/GoppPIeP6JDaMMkMrEJnMZhKyyS6iKwVt5YKu02vCUyJM3Ug=="
+    },
+    "@mapbox/unitbezier@0.0.1": {
+      "integrity": "sha512-nMkuDXFv60aBr9soUG5q+GvZYL+2KZHVvsqFCzqnkGEf46U2fvmytHaEVc1/YZbiLn8X+eR3QzX1+dwDO1lxlw=="
+    },
+    "@mapbox/vector-tile@2.0.4": {
+      "integrity": "sha512-AkOLcbgGTdXScosBWwmmD7cDlvOjkg/DetGva26pIRiZPdeJYjYKarIlb4uxVzi6bwHO6EWH82eZ5Nuv4T5DUg==",
+      "dependencies": [
+        "@mapbox/point-geometry",
+        "@types/geojson",
+        "pbf"
+      ]
+    },
+    "@mapbox/whoots-js@3.1.0": {
+      "integrity": "sha512-Es6WcD0nO5l+2BOQS4uLfNPYQaNDfbot3X1XUoloz+x0mPDS3eeORZJl06HXjwBG1fOGwCRnzK88LMdxKRrd6Q=="
+    },
+    "@maplibre/maplibre-gl-style-spec@23.3.0": {
+      "integrity": "sha512-IGJtuBbaGzOUgODdBRg66p8stnwj9iDXkgbYKoYcNiiQmaez5WVRfXm4b03MCDwmZyX93csbfHFWEJJYHnn5oA==",
+      "dependencies": [
+        "@mapbox/jsonlint-lines-primitives",
+        "@mapbox/unitbezier",
+        "json-stringify-pretty-compact",
+        "minimist",
+        "quickselect",
+        "rw",
+        "tinyqueue"
+      ]
+    },
+    "@maplibre/vt-pbf@4.0.3": {
+      "integrity": "sha512-YsW99BwnT+ukJRkseBcLuZHfITB4puJoxnqPVjo72rhW/TaawVYsgQHcqWLzTxqknttYoDpgyERzWSa/XrETdA==",
+      "dependencies": [
+        "@mapbox/point-geometry",
+        "@mapbox/vector-tile",
+        "@types/geojson-vt",
+        "@types/supercluster",
+        "geojson-vt",
+        "pbf",
+        "supercluster"
+      ]
+    },
     "@mongodb-js/saslprep@1.3.0": {
       "integrity": "sha512-zlayKCsIjYb7/IdfqxorK5+xUMyi4vOKcFy10wKJYc63NSdKI8mNME+uJqfatkPmOSMMUiojrL58IePKBm3gvQ==",
       "dependencies": [
@@ -1534,6 +1589,15 @@
     "@types/estree@1.0.8": {
       "integrity": "sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w=="
     },
+    "@types/geojson-vt@3.2.5": {
+      "integrity": "sha512-qDO7wqtprzlpe8FfQ//ClPV9xiuoh2nkIgiouIptON9w5jvD/fA4szvP9GBlDVdJ5dldAl0kX/sy3URbWwLx0g==",
+      "dependencies": [
+        "@types/geojson"
+      ]
+    },
+    "@types/geojson@7946.0.16": {
+      "integrity": "sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg=="
+    },
     "@types/http-proxy@1.17.16": {
       "integrity": "sha512-sdWoUajOB1cd0A8cRRQ1cfyWNbmFKLAqBB89Y8x5iYyG/mkJHc0YUH8pdWBy2omi9qtCpiIgGjuwO0dQST2l5w==",
       "dependencies": [
@@ -1550,6 +1614,12 @@
       "integrity": "sha512-Fll2FZ1riMjNmlmJOdAyY5pUbkftXslB5DgEzlIuNaiWhXd00FhWxVC/r4yV/4wBb9JfImTu+jiSvXTkJ7F/gA==",
       "dependencies": [
         "undici-types"
+      ]
+    },
+    "@types/supercluster@7.1.3": {
+      "integrity": "sha512-Z0pOY34GDFl3Q6hUFYf3HkTwKEE02e7QgtJppBt+beEAxnyOpJua+voGFvxINBHa06GwLFFym7gRPY2SiKIfIA==",
+      "dependencies": [
+        "@types/geojson"
       ]
     },
     "@types/webidl-conversions@7.0.3": {
@@ -2124,6 +2194,9 @@
         "gopd"
       ]
     },
+    "earcut@3.0.2": {
+      "integrity": "sha512-X7hshQbLyMJ/3RPhyObLARM2sNxxmRALLKx1+NVFFnQ9gKzmCrxm9+uLIAdBcvc8FNLpctqlQ2V6AE92Ol9UDQ=="
+    },
     "ee-first@1.1.1": {
       "integrity": "sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow=="
     },
@@ -2456,6 +2529,9 @@
     "gensync@1.0.0-beta.2": {
       "integrity": "sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg=="
     },
+    "geojson-vt@4.0.2": {
+      "integrity": "sha512-AV9ROqlNqoZEIJGfm1ncNjEXfkz2hdFlZf0qkVfmkwdKa8vj7H16YUOT81rJw1rdFhyEDlN2Tds91p/glzbl5A=="
+    },
     "get-caller-file@2.0.5": {
       "integrity": "sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg=="
     },
@@ -2480,6 +2556,12 @@
         "dunder-proto",
         "es-object-atoms"
       ]
+    },
+    "get-stream@6.0.1": {
+      "integrity": "sha512-ts6Wi+2j3jQjqi70w5AlN8DFnkSwC+MqmxEzdEALB2qXZYV3X/b1CTfgPLGJNMeAWxdPfU8FO1ms3NUfaHCPYg=="
+    },
+    "gl-matrix@3.4.4": {
+      "integrity": "sha512-latSnyDNt/8zYUB6VIJ6PCh2jBjJX6gnDsoCZ7LyW7GkqrD51EWwa9qCoGixj8YqBtETQK/xY7OmpTF8xz1DdQ=="
     },
     "glob-parent@5.1.2": {
       "integrity": "sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==",
@@ -2870,6 +2952,9 @@
     "json-parse-even-better-errors@2.3.1": {
       "integrity": "sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w=="
     },
+    "json-stringify-pretty-compact@4.0.0": {
+      "integrity": "sha512-3CNZ2DnrpByG9Nqj6Xo8vqbjT4F6N+tb4Gb28ESAZjYZ5yqvmc56J+/kuIwkaAMOyblTQhUW7PxMkUb8Q36N3Q=="
+    },
     "json-to-pretty-yaml@1.2.2": {
       "integrity": "sha512-rvm6hunfCcqegwYaG5T4yKJWxc9FXFgBVrcTZ4XfSVRwa5HA/Xs+vB/Eo9treYYHCeNM0nrSUr82V/M31Urc7A==",
       "dependencies": [
@@ -2882,6 +2967,9 @@
     },
     "kareem@2.6.3": {
       "integrity": "sha512-C3iHfuGUXK2u8/ipq9LfjFfXFxAZMQJJq7vLS45r3D9Y2xQ/m4S8zaR4zMLFWh9AsNPXmcFfUDhTEO8UIC/V6Q=="
+    },
+    "kdbush@4.0.2": {
+      "integrity": "sha512-WbCVYJ27Sz8zi9Q7Q0xHC+05iwkm3Znipc2XTlrnJbsHMYktW4hPhXUE8Ys1engBrvffoSCqbil1JQAa7clRpA=="
     },
     "lightningcss-darwin-arm64@1.30.1": {
       "integrity": "sha512-c8JK7hyE65X1MHMN+Viq9n11RRC7hgin3HhYKhrMyaXflk5GVplZ60IxyoVtzILeKr+xAJwg6zK6sjTBJ0FKYQ=="
@@ -3009,6 +3097,33 @@
     "map-cache@0.2.2": {
       "integrity": "sha512-8y/eV9QQZCiyn1SprXSrCmqJN0yNRATe+PO8ztwqrvrbdRLA3eYJF0yaR0YayLWkMbsQSKWS9N2gPcGEc4UsZg=="
     },
+    "maplibre-gl@5.6.2": {
+      "integrity": "sha512-SEqYThhUCFf6Lm0TckpgpKnto5u4JsdPYdFJb6g12VtuaFsm3nYdBO+fOmnUYddc8dXihgoGnuXvPPooUcRv5w==",
+      "dependencies": [
+        "@mapbox/geojson-rewind",
+        "@mapbox/jsonlint-lines-primitives",
+        "@mapbox/point-geometry",
+        "@mapbox/tiny-sdf",
+        "@mapbox/unitbezier",
+        "@mapbox/vector-tile",
+        "@mapbox/whoots-js",
+        "@maplibre/maplibre-gl-style-spec",
+        "@maplibre/vt-pbf",
+        "@types/geojson",
+        "@types/geojson-vt",
+        "@types/supercluster",
+        "earcut",
+        "geojson-vt",
+        "gl-matrix",
+        "kdbush",
+        "murmurhash-js",
+        "pbf",
+        "potpack",
+        "quickselect",
+        "supercluster",
+        "tinyqueue"
+      ]
+    },
     "math-intrinsics@1.1.0": {
       "integrity": "sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g=="
     },
@@ -3067,6 +3182,9 @@
         "brace-expansion"
       ]
     },
+    "minimist@1.2.8": {
+      "integrity": "sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA=="
+    },
     "minipass@7.1.2": {
       "integrity": "sha512-qOOzS1cBTWYF4BH8fVePDBOO9iptMnGUEZwNc/cMWnTV2nVLZ7VoNWEPHkYczZA0pdoA7dl6e7FL659nX9S2aw=="
     },
@@ -3123,6 +3241,9 @@
     },
     "ms@2.1.3": {
       "integrity": "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA=="
+    },
+    "murmurhash-js@1.0.0": {
+      "integrity": "sha512-TvmkNhkv8yct0SVBSy+o8wYzXjE4Zz3PCesbfs8HiCXXdcTuocApFv11UWlNFWKYsP2okqrhb7JNlSm9InBhIw=="
     },
     "mute-stream@0.0.8": {
       "integrity": "sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA=="
@@ -3314,6 +3435,12 @@
     "path-type@4.0.0": {
       "integrity": "sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw=="
     },
+    "pbf@4.0.1": {
+      "integrity": "sha512-SuLdBvS42z33m8ejRbInMapQe8n0D3vN/Xd5fmWM3tufNgRQFBpaW2YVJxQZV4iPNqb0vEFvssMEo5w9c6BTIA==",
+      "dependencies": [
+        "resolve-protobuf-schema"
+      ]
+    },
     "picocolors@1.1.1": {
       "integrity": "sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA=="
     },
@@ -3342,11 +3469,17 @@
         "source-map-js"
       ]
     },
+    "potpack@2.1.0": {
+      "integrity": "sha512-pcaShQc1Shq0y+E7GqJqvZj8DTthWV1KeHGdi0Z6IAin2Oi3JnLCOfwnCo84qc+HAp52wT9nK9H7FAJp5a44GQ=="
+    },
     "promise@7.3.1": {
       "integrity": "sha512-nolQXZ/4L+bP/UGlkfaIujX9BKxGwmQ9OT4mOt5yvy8iK1h3wqTEJCijzGANTCCl9nWjY41juyAn2K3Q1hLLTg==",
       "dependencies": [
         "asap"
       ]
+    },
+    "protocol-buffers-schema@3.6.0": {
+      "integrity": "sha512-TdDRD+/QNdrCGCE7v8340QyuXd4kIWIgapsE2+n/SaGiSSbomYl4TjHlvIoCWRpE7wFt02EpB35VVA2ImcBVqw=="
     },
     "proxy-addr@2.0.7": {
       "integrity": "sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==",
@@ -3372,6 +3505,9 @@
     },
     "queue-microtask@1.2.3": {
       "integrity": "sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A=="
+    },
+    "quickselect@3.0.0": {
+      "integrity": "sha512-XdjUArbK4Bm5fLLvlm5KpTFOiOThgfWWI4axAZDWg4E/0mKdZyI9tNEfds27qCi1ze/vwTR16kvmmGhRra3c2g=="
     },
     "random-words@1.3.0": {
       "integrity": "sha512-brwCGe+DN9DqZrAQVNj1Tct1Lody6GrYL/7uei5wfjeQdacFyFd2h/51LNlOoBMzIKMS9xohuL4+wlF/z1g/xg==",
@@ -3438,6 +3574,12 @@
     "resolve-from@5.0.0": {
       "integrity": "sha512-qYg9KP24dD5qka9J47d0aVky0N+b4fTU89LN9iDnjB5waksiC49rvMB0PrUJQGoTmH50XPiqOvAjDfaijGxYZw=="
     },
+    "resolve-protobuf-schema@2.1.0": {
+      "integrity": "sha512-kI5ffTiZWmJaS/huM8wZfEMer1eRd7oJQhDuxeCLe3t7N7mX3z94CN0xPxBQxFYQTSNz9T0i+v6inKqSdK8xrQ==",
+      "dependencies": [
+        "protocol-buffers-schema"
+      ]
+    },
     "restore-cursor@3.1.0": {
       "integrity": "sha512-l+sSefzHpj5qimhFSE5a8nufZYAM3sBSVMAPtYkmC+4EH2anSGaEMXSD0izRQbu9nfyQ9y5JrVmp7E8oZrUjvA==",
       "dependencies": [
@@ -3486,6 +3628,9 @@
       "dependencies": [
         "queue-microtask"
       ]
+    },
+    "rw@1.3.3": {
+      "integrity": "sha512-PdhdWy89SiZogBLaw42zdeqtRJ//zFd2PgQavcICDUgJT5oW10QCRKbJ6bg4r0/UY2M6BWd5tkxuGFRvCkgfHQ=="
     },
     "rxjs@7.8.2": {
       "integrity": "sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==",
@@ -3791,6 +3936,12 @@
         "react"
       ]
     },
+    "supercluster@8.0.1": {
+      "integrity": "sha512-IiOea5kJ9iqzD2t7QJq/cREyLHTtSmUT6gQsweojg9WH2sYJqZK9SswTu6jrscO6D1G5v5vYZ9ru/eq85lXeZQ==",
+      "dependencies": [
+        "kdbush"
+      ]
+    },
     "supports-color@7.2.0": {
       "integrity": "sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==",
       "dependencies": [
@@ -3840,6 +3991,9 @@
         "fdir",
         "picomatch@4.0.3"
       ]
+    },
+    "tinyqueue@3.0.0": {
+      "integrity": "sha512-gRa9gwYU3ECmQYv3lslts5hxuIa90veaEcxDYuu3QGOIAEM2mOZkVHp48ANJuu1CURtRdHKUBY5Lm1tHV+sD4g=="
     },
     "title-case@3.0.3": {
       "integrity": "sha512-e1zGYRvbffpcHIrnuqT0Dh+gEJtDaxDSoG4JAIpq4oDFyooziLBIiYQv0GBT4FUAnUop5uZ1hiIAj7oAF6sOCA==",
@@ -4195,6 +4349,7 @@
         "npm:daisyui@^5.0.49",
         "npm:fuse@~0.12.1",
         "npm:hono@^4.8.9",
+        "npm:maplibre-gl@^5.6.2",
         "npm:mongoose@^8.16.5",
         "npm:solid-icons@^1.1.0",
         "npm:solid-js@^1.9.7",
