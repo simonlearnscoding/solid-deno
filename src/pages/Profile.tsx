@@ -81,7 +81,9 @@ export default function ProfilePage() {
 
                       <div class="flex items-center gap-3 p-3 rounded-xl bg-base-200">
                         <FaSolidLocationDot class="w-5 h-5 opacity-80" />
-                        <span class="truncate">{user.location || "Sister blvd 24, Sesame Street"}</span>
+                        <span class="truncate">
+                          {user.location || "Sister blvd 24, Sesame Street"}
+                        </span>
                       </div>
                     </div>
 

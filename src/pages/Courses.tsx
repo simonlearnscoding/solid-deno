@@ -1,10 +1,17 @@
 import CourseCard from "../components/CourseCard.tsx";
 
 import CityPicker from "../components/CityPicker.tsx";
-import { type City } from "../data/cities.ts";
+import { type City, CITIES } from "../data/cities.ts";
 import useQueryCoursesNearby from "../hooks/queries/useQueryCoursesNearby.ts";
 
-import { createSignal, For, Suspense, Show, createMemo } from "solid-js";
+import {
+  createSignal,
+  For,
+  Suspense,
+  Show,
+  createMemo,
+  onMount,
+} from "solid-js";
 
 import Map from "../components/Map.tsx";
 import useQueryCoursesInBounds, {
@@ -37,6 +44,18 @@ export default function Courses() {
     max: city()?.radiusKm ? city()!.radiusKm! * 1000 : 15000,
   });
   const [query, setQuery] = createSignal("");
+
+  onMount(() => {
+    if (!city()) {
+      const zurich = CITIES.find((c) => c.slug === "zurich");
+      if (zurich) {
+        setCity(zurich);
+        setBounds(
+          bboxFromCenterRadius(zurich.center, (zurich.radiusKm ?? 10) * 1000),
+        );
+      }
+    }
+  });
 
   // --- filtering helpers ---
   const norm = (s: string) =>
@@ -155,16 +174,15 @@ export default function Courses() {
           </Suspense>
         </section>
 
-
-<aside class="block">
-  <div class="sticky top-4 h-[calc(100dvh-8rem)] rounded-2xl overflow-hidden shadow bg-base-100">
-    <Map
-      center={mapCenter}                // accessor
-      zoom={11}                         // number (optional)
-      onBoundsChanged={(b) => setBounds(b)}
-    />
-  </div>
-</aside>
+        <aside class="block">
+          <div class="sticky top-4 h-[calc(100dvh-8rem)] rounded-2xl overflow-hidden shadow bg-base-100">
+            <Map
+              center={mapCenter} // accessor
+              zoom={11} // number (optional)
+              onBoundsChanged={(b) => setBounds(b)}
+            />
+          </div>
+        </aside>
       </div>
     </main>
   );

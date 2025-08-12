@@ -1,4 +1,5 @@
 // ResponsiveNav.tsx
+import LogoutButton from "../components/LogoutButton.tsx";
 import { A, useLocation } from "@solidjs/router";
 import { createMemo, For, type Accessor } from "solid-js";
 import { AiFillHome } from "solid-icons/ai";
@@ -63,6 +64,9 @@ const TopNavBar = ({ active }: { active: ActiveFn }) => {
             )}
           </For>
         </ul>
+      </div>
+      <div class="mr-4">
+        <LogoutButton />
       </div>
       <div class="">
         <div class="rounded-full flex relative w-12 h-12">

@@ -91,7 +91,7 @@ export default function Login() {
                 </button>
                 <div class="divider"> or </div>
                 <div
-                  class="cursor-pointer text-blue-500"
+                  class="cursor-pointer  mx-auto text-blue-500"
                   onClick={() => {
                     // Login logic
                     navigate("/signup", { replace: true });
