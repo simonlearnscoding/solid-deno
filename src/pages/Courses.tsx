@@ -47,7 +47,7 @@ export default function Courses() {
 
   onMount(() => {
     if (!city()) {
-      const zurich = CITIES.find((c) => c.slug === "zurich");
+      const zurich = CITIES.find((c) => c.slug === "lugano");
       if (zurich) {
         setCity(zurich);
         setBounds(
