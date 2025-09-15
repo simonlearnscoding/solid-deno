@@ -34,7 +34,7 @@ export default function useQueryCoursesInBounds(
       gcTime: 60_000,
       queryFn: async ({ signal }) => {
         if (!bounds) return [];
-        const url = new URL("http://localhost:8000/courses/in-bounds");
+        const url = new URL("/api/courses/in-bounds");
         Object.entries({ ...bounds, limit: 300 }).forEach(([k, v]) =>
           url.searchParams.set(k, String(v)),
         );

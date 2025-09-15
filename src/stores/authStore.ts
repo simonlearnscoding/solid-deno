@@ -28,7 +28,7 @@ type RegisterInput = {
 const actions = {
   async verifyToken() {
     try {
-      const res = await fetch("http://localhost:8000/users/me", {
+      const res = await fetch("/api/users/me", {
         credentials: "include",
       });
       if (!res.ok) {
@@ -51,7 +51,7 @@ const actions = {
       fd.append("name", input.name);
       if (input.avatar) fd.append("avatar", input.avatar);
 
-      const res = await fetch("http://localhost:8000/auth/register", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         credentials: "include",
         body: fd,
@@ -70,7 +70,7 @@ const actions = {
   async login(email: string, password: string) {
     setAuthState({ loading: true, error: null });
     try {
-      const res = await fetch("http://localhost:8000/auth/login", {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         credentials: "include",
         headers: {

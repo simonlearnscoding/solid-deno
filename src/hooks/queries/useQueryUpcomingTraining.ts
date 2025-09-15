@@ -5,10 +5,9 @@ const fetchUpcomingTrainings = async (search: string): Promise<Training[]> => {
   const params = new URLSearchParams();
   if (search) params.append("q", search);
 
-  const res = await fetch(
-    `http://localhost:8000/users/me/trainings?${params.toString()}`,
-    { credentials: "include" },
-  );
+  const res = await fetch(`/api/users/me/trainings?${params.toString()}`, {
+    credentials: "include",
+  });
   if (!res.ok) throw new Error("Failed to fetch upcoming trainings");
   return res.json();
 };

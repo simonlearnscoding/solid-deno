@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/solid-query";
 import type { Training } from "../../../types/index.ts";
 
 const fetchNextTraining = async (): Promise<Training | null> => {
-  const res = await fetch("http://localhost:8000/users/me/trainings/next", {
+  const res = await fetch("/api/users/me/trainings/next", {
     credentials: "include",
   });
 

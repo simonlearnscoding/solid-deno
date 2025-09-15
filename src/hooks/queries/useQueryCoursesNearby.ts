@@ -18,7 +18,7 @@ const fetchCoursesNearby = async (
     q?: string;
   },
 ): Promise<any> => {
-  const url = new URL("http://localhost:8000/courses/near");
+  const url = new URL("/api/courses/near");
   url.searchParams.set("lng", String(center.lng));
   url.searchParams.set("lat", String(center.lat));
   if (opts?.max) url.searchParams.set("max", String(opts.max));

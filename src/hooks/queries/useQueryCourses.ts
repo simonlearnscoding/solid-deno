@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/solid-query";
 import type { Course } from "../../../types/index.ts";
 
 const fetchCourses = async (): Promise<Course[]> => {
-  const res = await fetch("http://localhost:8000/courses", {
+  const res = await fetch("/api/courses", {
     credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to fetch courses");
