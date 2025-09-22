@@ -79,10 +79,11 @@ const actions = {
         body: JSON.stringify({ email, password }),
       });
       //TODO: kinda nasty but it'll do for now
+      console.log("error login response aaa", res);
       if (!res.ok) throw new Error("error logging in");
-
       setAuthState({ loading: false });
     } catch (err) {
+      console.log("error login", err);
       setAuthState({ error: "User or Password wrong", loading: false });
     }
   },

@@ -2,7 +2,6 @@ import { createSignal } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { Show } from "solid-js";
 import { useAuthStore } from "../stores/authStore.ts";
-import { createEffect } from "solid-js";
 
 export default function Login() {
   const [email, setEmail] = createSignal("");
@@ -13,7 +12,9 @@ export default function Login() {
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
     await auth.actions.login(email(), password());
-    navigate("/", { replace: true });
+    if (!auth.state.error) {
+      navigate("/", { replace: true });
+    }
   };
 
   return (
