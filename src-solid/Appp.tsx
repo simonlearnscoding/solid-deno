@@ -1,0 +1,47 @@
+import { Route, Router } from "@solidjs/router";
+import Index from "./pages/Index.tsx";
+import AppLayout from "./layouts/AppLayout.tsx";
+import CourseDetailsModal from "./components/CourseDetailsModal.tsx";
+import Profile from "./pages/Profile.tsx";
+import Courses from "./pages/Courses.tsx";
+import Login from "./pages/Login.tsx";
+import Register from "./pages/Register.tsx";
+import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
+import { onMount } from "solid-js";
+import { useAuthStore } from "./stores/authStore.ts";
+import AuthProvider from "./layouts/AuthProvider.tsx";
+import ProtectedRoute from "./components/auth/ProtectedRoute.tsx";
+import "./App.css";
+
+const App = () => {
+  const auth = useAuthStore();
+  onMount(() => {
+    console.log(auth.state.user);
+    if (!auth.state.user) {
+      auth.actions.verifyToken();
+      document.documentElement.setAttribute("data-theme", "winter");
+    }
+  });
+  //TODO: protect routes when user not logged in
+  const queryClient = new QueryClient();
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Router>
+          <Route component={ProtectedRoute}>
+            <Route path="/" component={AppLayout}>
+              <Route path="" component={Index} />
+              <Route path="profile" component={Profile} />
+              <Route path="search" component={Courses} />
+              <Route path="/courses/:id" component={CourseDetailsModal} />
+            </Route>
+          </Route>
+          <Route path="/login" component={Login} />
+          <Route path="/signup" component={Register} />
+        </Router>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
+
+export default App;

@@ -1,18 +1,17 @@
-/* @refresh reload */
-import { authFetch } from "./lib/authFetch.ts";
+import { createRoot } from "react-dom/client";
+import "./index.css";
+import App from "./Appp";
+import { authFetch } from "./lib/authFetch";
 
 // grab the real fetch once
 const realFetch = window.fetch.bind(window);
 
 // override global fetch
 window.fetch = async (input: RequestInfo, init?: RequestInit) => {
-  // delegate to your authFetch, but pass realFetch in
   return authFetch(realFetch, input, init);
 };
-import { render } from "solid-js/web";
-import "./index.css";
-import App from "./App.tsx";
 
 const root = document.getElementById("root");
+if (!root) throw new Error("Root element not found");
 
-render(() => <App />, root!);
+createRoot(root).render(<App />);

@@ -1,0 +1,17 @@
+FROM denoland/deno:alpine
+
+WORKDIR /app
+
+# Copy dependency files first for better caching
+COPY deno.json deno.lock ./
+
+# Copy backend code
+COPY api/ ./api/
+COPY lib/ ./lib/
+COPY types/ ./types/
+
+# Cache dependencies
+
+EXPOSE 8000
+
+CMD ["deno", "task", "dev:api"]

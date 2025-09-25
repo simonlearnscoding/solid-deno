@@ -1,5 +1,5 @@
 import { Hono } from "@hono/hono";
-import { HTTPException } from "hono/http-exception";
+import { HTTPException } from "@hono/hono/http-exception";
 import { Context } from "jsr:@hono/hono";
 import { Types } from "mongoose";
 import { upsertTrainingAttendanceToggle } from "../services/trainings.ts";

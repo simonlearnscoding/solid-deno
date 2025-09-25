@@ -1,7 +1,7 @@
 {
   "tasks": {
     "dev": "deno task dev:api & deno task dev:vite",
-    "dev:api": "deno run --allow-env --allow-write --env-file=.env --allow-sys --allow-net --allow-read api/main.ts",
+    "dev:api": "deno run --watch --allow-env --allow-write --allow-sys --allow-net --allow-read api/main.ts",
     "dev:vite": "deno run --env-file=.env -A npm:vite",
     "build": "deno run -A npm:vite build",
     "serve": {
@@ -15,6 +15,7 @@
     "bcryptjs": "npm:bcryptjs@2.4.3",
     "solid-icons/": "npm:solid-icons/",
     "@hono/jwt": "jsr:@hono/hono/jwt",
+    "mongoose": "npm:mongoose@^8.18.2",   
     "maplibre-gl": "npm:maplibre-gl@^5.6.2",
     "@solidjs/router": "npm:@solidjs/router@^0.14.10"
   },

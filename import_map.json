@@ -1,0 +1,11 @@
+
+{
+  "imports": {
+    "@hono/hono": "jsr:@hono/hono@^4.8.9",
+    "bcryptjs": "npm:bcryptjs@2.4.3",
+    "solid-icons/": "npm:solid-icons/",
+    "@hono/jwt": "jsr:@hono/hono/jwt",
+    "maplibre-gl": "npm:maplibre-gl@^5.6.2",
+    "@solidjs/router": "npm:@solidjs/router@^0.14.10"
+  }
+}

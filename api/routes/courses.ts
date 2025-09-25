@@ -1,6 +1,6 @@
 import { Hono } from "@hono/hono";
 import { Context } from "jsr:@hono/hono";
-import { HTTPException } from "hono/http-exception";
+import { HTTPException } from "@hono/hono/http-exception";
 import { Types } from "mongoose";
 
 import { toNumber } from "./../utils/geo.ts";

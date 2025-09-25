@@ -1,5 +1,5 @@
 import { Hono } from "@hono/hono";
-import { HTTPException } from "hono/http-exception"; // Add this import
+import { HTTPException } from "@hono/hono/http-exception";
 import { Context } from "jsr:@hono/hono";
 import User from "./../models/User.ts";
 import { HonoVars } from "./../../types/index.ts";

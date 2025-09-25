@@ -1,6 +1,6 @@
 // middleware/logger.ts
 import { createMiddleware } from "jsr:@hono/hono/factory";
-import { HTTPException } from "hono/http-exception"; // Add this import
+import { HTTPException } from "@hono/hono/http-exception";
 import type { MiddlewareHandler } from "jsr:@hono/hono";
 
 import { getCookie } from "jsr:@hono/hono/cookie";

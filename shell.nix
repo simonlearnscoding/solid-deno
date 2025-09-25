@@ -2,7 +2,8 @@
 pkgs.mkShell {
   buildInputs = [
     pkgs.docker
-    pkgs.podman-compose
+    pkgs.docker-compose
+    pkgs.lazydocker
     # pkgs.nodejs
     # pkgs.typescript
     # pkgs.nodePackages.typescript-language-server
@@ -10,30 +11,55 @@ pkgs.mkShell {
   ];
 
   shellHook = ''
-
-    # Start MongoDB if not running
-    if ! curl -s http://localhost:27017/ >/dev/null; then
-      echo "Starting MongoDB container..."
-      podman-compose up -d
-
-      while ! curl -s http://localhost:27017/ >/dev/null; do
-        sleep 1
-        echo "Waiting for MongoDB to start..."
-      done
+    # Check if Docker daemon is running
+    if ! docker info >/dev/null 2>&1; then
+      echo "⚠️  Docker daemon is not running"
+      echo "   Start it with: sudo systemctl start docker"
     else
-      echo "MongoDB is already running"
+      echo "✅ Docker daemon is running"
     fi
 
-    # # Start Redis if not running
-    # if ! redis-cli ping | grep -q PONG; then
-    #   echo "Starting Redis server..."
-    #   redis-server --daemonize yes > /dev/null 2>&1
-    #   while ! redis-cli ping | grep -q PONG; do
-    #     sleep 1
-    #     echo "Waiting for Redis to start..."
-    #   done
-    # else
-    #   echo "Redis is already running"
-    # fi
+    # Function to start services
+    start-services() {
+      echo "Starting services..."
+      docker-compose -f docker-compose.dev.yml up -d
+      echo "Services started! Run 'lazydocker' to monitor"
+    }
+
+    # Function to stop services
+    stop-services() {
+      echo "Stopping services..."
+      docker-compose -f docker-compose.dev.yml down
+      echo "Services stopped!"
+    }
+
+    # Function to restart services
+    restart-services() {
+      stop-services
+      sleep 2
+      start-services
+    }
+
+    # Function to view logs
+    service-logs() {
+      docker-compose -f docker-compose.dev.yml logs -f
+    }
+
+    # Function to check service status
+    service-status() {
+      docker-compose -f docker-compose.dev.yml ps
+    }
+
+    echo "🚀 Docker, Docker Compose, and Lazydocker are ready!"
+    echo ""
+    echo "📋 Available commands:"
+    echo "   start-services      - Start MongoDB and backend"
+    echo "   stop-services       - Stop all services"
+    echo "   restart-services    - Restart all services"
+    echo "   service-logs        - View service logs"
+    echo "   service-status      - Check service status"
+    echo "   lazydocker          - Monitor containers (TUI)"
+    echo ""
+    echo "💡 Run 'start-services' when you need MongoDB running"
   '';
 }

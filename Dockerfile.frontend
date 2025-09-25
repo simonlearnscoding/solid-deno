@@ -1,0 +1,23 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json yarn.lock ./
+COPY index.html ./
+COPY vite.config.ts ./
+COPY tsconfig.json ./
+COPY tsconfig.app.json ./
+COPY tsconfig.node.json ./  
+COPY src/ ./src/
+COPY public/ ./public/
+
+# Install dependencies
+RUN yarn install --frozen-lockfile --ignore-engines
+
+# Build the frontend
+RUN yarn build
+
+# Use Vite's preview server
+EXPOSE 4173
+CMD ["yarn", "preview", "--host", "0.0.0.0", "--port", "4173"]
