@@ -14,4 +14,10 @@ export default defineConfig({
       },
     },
   },
+
+  preview: {
+    host: true, // listen on all interfaces
+    port: 4173,
+    allowedHosts: ["app.simone-muscas.com"],
+  },
 });
