@@ -40,7 +40,7 @@ services:
     ports:
       - "3000:4173"
     environment:
-      - VITE_API_URL=https://app.simone-muscas.com/api
+      - VITE_API_URL=/api
     depends_on:
       - backend
     networks:
