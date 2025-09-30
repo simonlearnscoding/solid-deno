@@ -4,6 +4,8 @@
     "dev:api": "deno run --watch --allow-env --allow-write --allow-sys --allow-net --allow-read api/main.ts",
     "dev:vite": "deno run --env-file=.env -A npm:vite",
     "build": "deno run -A npm:vite build",
+    "generate:routes": "deno run -A npm:@tanstack/router-cli generate",
+    "dev:with-routes": "deno task generate:routes && deno task dev",
     "serve": {
       "command": "deno task dev:api",
       "description": "Run the build, and then start the API server",
@@ -17,7 +19,11 @@
     "@hono/jwt": "jsr:@hono/hono/jwt",
     "mongoose": "npm:mongoose@^8.18.2",   
     "maplibre-gl": "npm:maplibre-gl@^5.6.2",
-    "@solidjs/router": "npm:@solidjs/router@^0.14.10"
+    "@solidjs/router": "npm:@solidjs/router@^0.14.10",
+    "@tanstack/react-router": "npm:@tanstack/react-router@^1.7.5",
+    "@tanstack/router-plugin": "npm:@tanstack/router-plugin@^1.7.5",
+    "@tanstack/react-router-devtools": "npm:@tanstack/react-router-devtools@^1.7.5",
+    "@tanstack/router-cli": "npm:@tanstack/router-cli@^1.7.5"
   },
   "compilerOptions": {
     "jsx": "react-jsx",
