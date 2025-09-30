@@ -15,7 +15,7 @@ export default function Home() {
 
   return (
     <div className="p-6">
-      <h1 className="text-xl font-bold">Backend Test</h1>
+      <h1 className="text-xl font-bold">Backend Testyy</h1>
       <p>API says: {data.message}</p>
     </div>
   );
